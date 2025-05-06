@@ -1,5 +1,6 @@
 import { Schema, model, Types } from "mongoose";
 import Message from "./MessageModel";
+import User from "./UserModel";
 
 // Create interface
 interface IChat {
@@ -9,12 +10,13 @@ interface IChat {
         enum: ['group', 'single']
     }
 
-    participantList: [Types.ObjectId],
-
-    messageList: [{
+    participantList: {
         type: Types.ObjectId,
-        ref: 'Message'
-    }]
+        ref: 'User'}[],
+
+    messageList: {
+        type: Types.ObjectId,
+        ref: 'Message'}[]
 }
 
 // Create Schema
@@ -24,10 +26,14 @@ const chatSchema = new Schema<IChat>({
         enum: ['group', 'single']
     },
     name: String,
-    participantList: [Types.ObjectId],
+    participantList: [
+        {
+            type: Types.ObjectId,
+            ref: 'User'
+    }],
     messageList: [{
-        type: Types.ObjectId,
-        ref: 'Message'
+            type: Types.ObjectId,
+            ref: 'Message'
     }]
 });
 

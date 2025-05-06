@@ -1,8 +1,8 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 // Create interface
 interface IMessage {
-    sender: string,
+    sender: Types.ObjectId,
     type: {
         type: string,
         enum: ['text', 'image', 'video', 'audio', 'file']
@@ -13,7 +13,7 @@ interface IMessage {
 
 // Create schema
 const messageSchema = new Schema<IMessage>({
-    sender: {type: String, required: true},
+    sender: {type: Schema.Types.ObjectId, required: true},
     type: {
         type: String,
         enum: ['text', 'image', 'video', 'audio', 'file'],

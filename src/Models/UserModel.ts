@@ -8,7 +8,7 @@ interface IUser {
     name: string;
     friendList: {
         type: Types.ObjectId,
-        ref: 'Friend'}[];
+        ref: 'User'}[];
     };
 
 
