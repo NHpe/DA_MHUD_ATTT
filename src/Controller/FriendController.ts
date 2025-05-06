@@ -69,3 +69,5 @@ class FriendController {
         }
     }
 }
+
+export default new FriendController();
