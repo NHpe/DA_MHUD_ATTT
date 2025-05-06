@@ -18,7 +18,8 @@ class UserService {
 
             const newUser = new User({
                 account,
-                password: hashPassword
+                password: hashPassword,
+                name: account
             });
 
             await newUser.save();
@@ -62,6 +63,47 @@ class UserService {
                 message: 'Login successfully'
             }
 
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async getUserByID (userId) {
+        try {
+            const user = await User.findById(userId);
+
+            return {
+                status: 'success',
+                message: 'Get user successfully',
+                data: user
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async getFriendList(userId) {
+        try {
+            const user = await User.findById(userId);
+
+            const friendList = user.friendList.map(async friend => {
+                const friend_1 = await User.findById(friend);
+                return {
+                    name: friend_1.name,
+                };
+            });
+
+            return {
+                status: 'success',
+                message: 'Get friend list successfully',
+                data: friendList
+            }
         } catch (error) {
             return {
                 status: 'error',
