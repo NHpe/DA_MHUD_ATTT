@@ -1,43 +1,69 @@
-import { Schema, model, Types } from "mongoose";
-import Message from "./MessageModel";
-import User from "./UserModel";
+import { Schema, model, Types, Model, HydratedDocument } from "mongoose";
 
-// Create interface
-interface IChat {
-    name: string,
+// IMessage interface
+interface IMessage {
+    sender: {
+        type: Types.ObjectId,
+        ref: 'User'
+    },
     type: {
         type: string,
-        enum: ['group', 'single']
-    }
-
-    participantList: {
-        type: Types.ObjectId,
-        ref: 'User'}[],
-
-    messageList: {
-        type: Types.ObjectId,
-        ref: 'Message'}[]
+        enum: ['text', 'image', 'video', 'audio', 'file']
+    },
+    content: string,
+    time: Date
 }
 
-// Create Schema
+// IChat interface
+interface IChat {
+    name: string;
+    type: {
+        type: string;
+        enum: ['group', 'single'];
+    };
+    chatKey: Types.Buffer;
+    participantList: {
+        type: Types.ObjectId;
+        ref: 'User';
+    }[];
+    messageList: IMessage[];
+}
+
+// Đây là kiểu Hydrated Document chuẩn
+type THydratedChatDocument = HydratedDocument<IChat>;
+
+// ChatModelType không cần override thêm unless bạn có custom method
+type ChatModelType = Model<IChat>;
+
+// Schema
 const chatSchema = new Schema<IChat>({
     type: {
         type: String,
         enum: ['group', 'single']
     },
     name: String,
+    chatKey: Types.Buffer,
     participantList: [
         {
             type: Types.ObjectId,
             ref: 'User'
-    }],
-    messageList: [{
-            type: Types.ObjectId,
-            ref: 'Message'
-    }]
+        }
+    ],
+    messageList: [
+        new Schema<IMessage>({
+            sender: {
+                type: Types.ObjectId,
+                ref: 'User'
+            },
+            type: {
+                type: String,
+                enum: ['text', 'image', 'video', 'audio', 'file']
+            },
+            content: String,
+            time: { type: Date, default: Date.now }
+        })
+    ]
 });
 
-// Create Model
-const Chat = model<IChat>('Chat', chatSchema);
-
-export default Chat;
+// Model
+export const Chat = model<IChat, ChatModelType>('Chat', chatSchema);

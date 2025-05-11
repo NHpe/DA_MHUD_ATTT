@@ -1,6 +1,5 @@
 import UserRouter from "./UserRoute";
 import FriendRouter from "./FriendRoute";
-import MessageRoute from "./MessageRoute";
 import ChatRoute from "./ChatRoute";
 
 import UserController from "../Controller/UserController";
@@ -11,7 +10,6 @@ function route(app) {
 
     app.use('/user', UserRouter);
     app.use('/friend', FriendRouter);
-    app.use('/message', MessageRoute);
     app.use('/chat', ChatRoute);
 
     app.get('/', (req, res) => {

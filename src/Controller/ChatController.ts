@@ -67,8 +67,8 @@ class ChatController {
 
     async addMessage(req, res) {
         try {
-            const {chatId, message} = req.body;
-            const result = await ChatService.addMessage(chatId, message);
+            const {chatId, sender, type, content} = req.body;
+            const result = await ChatService.addMessage(chatId, sender, type, content);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});

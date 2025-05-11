@@ -1,17 +1,26 @@
 import { Types } from "mongoose";
-import Chat from "../Models/ChatModel";
+import { Chat } from "../Models/ChatModel";
+
+import crypto, { randomBytes } from 'node:crypto'
 
 class ChatService {
     async createChat(isSingle: boolean, name: string, participantList: Types.ObjectId[]) {
         try {
+            let chatKey;
+            // Tạo khóa cho đoạn chat 
             if (isSingle) {
-                name = "";
+                const sortedUserId = [participantList[0].toString(), participantList[1].toString()].sort().join(':');
+                chatKey = crypto.scryptSync(sortedUserId, 'salt', 32); // AES-256
+            }
+            else {
+                chatKey = randomBytes(32); // AES-256
             }
 
             const chat = new Chat({
                 name,
                 type: isSingle ? 'single' : 'group',
-                participantList
+                participantList,
+                chatKey
             });
 
             await chat.save();
@@ -66,7 +75,7 @@ class ChatService {
 
             return {
                 status: 'error',
-                message: result.errors
+                message: 'Failed to remove participant or participant not found'
             }
         } catch (error) {
             return {
@@ -90,7 +99,7 @@ class ChatService {
 
             return {
                 status: 'error',
-                message: data.errors
+                message: 'Chat not found or message list is empty'
             }
         } catch (error) {
             return {
@@ -100,15 +109,18 @@ class ChatService {
         }
     }
 
-    async addMessage(chatId: Types.ObjectId, message: Types.ObjectId) {
+    async addMessage(chatId: Types.ObjectId, sender: Types.ObjectId, type: string, content: string) {
         try {
-            await Chat.updateOne({
-                _id: chatId
-            }, {
-                $push: {
-                    messageList: message
-                }
-            });
+            const chat = await Chat.findById(chatId);
+
+            chat.messageList.push({
+                sender: { type: sender, ref: 'User' },
+                type: { type, enum: ['text', 'image', 'video', 'audio', 'file'] },
+                content,
+                time: new Date(Date.now())
+            })
+
+            await chat.save()
 
             return {
                 status: 'success',
@@ -139,7 +151,7 @@ class ChatService {
 
             return {
                 status: 'error',
-                message: result.errors
+                message: 'Failed to remove message or message not found'
             }
 
         } catch (error) {

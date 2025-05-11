@@ -111,6 +111,40 @@ class UserService {
             }
         }
     }
+
+    async changePassword(userId, oldPassword, newPassword) {
+        try {
+            const user = await User.findById(userId);
+
+            // Kiểm tra password cũ
+            const hashOld = crypto.createHash('sha256');
+            const hashOldPassword = hashOld.update(oldPassword).digest('base64');
+
+            if (hashOldPassword == user.password) {
+                const hashNew = crypto.createHash('sha256');
+                const hashNewPassword = hashNew.update(newPassword).digest('base64');
+
+                // Cập nhật lại 
+                user.password = hashNewPassword;
+                await user.save();
+
+                return {
+                    status: 'success',
+                    message: 'Change password successfully'
+                }
+            }
+
+            return {
+                status: 'warning',
+                message: 'Password do not correctly'
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
 }
 
 export default new UserService();
