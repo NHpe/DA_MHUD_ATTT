@@ -1,69 +1,27 @@
-import { Schema, model, Types, Model, HydratedDocument } from "mongoose";
+import { Schema, model, Types, Model } from 'mongoose';
 
-// IMessage interface
-interface IMessage {
-    sender: {
-        type: Types.ObjectId,
-        ref: 'User'
-    },
-    type: {
-        type: string,
-        enum: ['text', 'image', 'video', 'audio', 'file']
-    },
-    content: string,
-    time: Date
+export interface IChat {
+  name?: string;
+  type: 'group' | 'single';
+  chatKey: Buffer;
+  iv: Buffer;
+  participantList: Types.ObjectId[];
 }
 
-// IChat interface
-interface IChat {
-    name: string;
-    type: {
-        type: string;
-        enum: ['group', 'single'];
-    };
-    chatKey: Types.Buffer;
-    participantList: {
-        type: Types.ObjectId;
-        ref: 'User';
-    }[];
-    messageList: IMessage[];
-}
+type ChatModel = Model<IChat>;
 
-// Đây là kiểu Hydrated Document chuẩn
-type THydratedChatDocument = HydratedDocument<IChat>;
-
-// ChatModelType không cần override thêm unless bạn có custom method
-type ChatModelType = Model<IChat>;
-
-// Schema
 const chatSchema = new Schema<IChat>({
+    name: String,
     type: {
         type: String,
-        enum: ['group', 'single']
+        enum: ['group', 'single'],
+        required: true
     },
-    name: String,
-    chatKey: Types.Buffer,
+    chatKey: { type: Buffer, required: true },
+    iv: { type: Buffer, required: true },
     participantList: [
-        {
-            type: Types.ObjectId,
-            ref: 'User'
-        }
-    ],
-    messageList: [
-        new Schema<IMessage>({
-            sender: {
-                type: Types.ObjectId,
-                ref: 'User'
-            },
-            type: {
-                type: String,
-                enum: ['text', 'image', 'video', 'audio', 'file']
-            },
-            content: String,
-            time: { type: Date, default: Date.now }
-        })
+        { type: Schema.Types.ObjectId, ref: 'User', required: true }
     ]
 });
 
-// Model
-export const Chat = model<IChat, ChatModelType>('Chat', chatSchema);
+export const Chat = model<IChat, ChatModel>('Chat', chatSchema);
