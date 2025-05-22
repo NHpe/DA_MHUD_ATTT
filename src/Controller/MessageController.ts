@@ -1,10 +1,21 @@
-import ChatService from "../Services/ChatService";
+import MessageService from "../Services/MessageService";
+import multer from "multer";
 
-class ChatController {
-    async createChat(req, res) {
+class MessageController {
+    async addNewMessage(req, res) {
         try {
-            const {isSingle, name, participantList} = req.body;
-            const result = await ChatService.createChat(isSingle, name, participantList);
+            const {chatId, sender, type, content, chatKey} = req.body;
+
+            let file = null;
+            if (req.file) {
+                file = {
+                    buffer: req.file.buffer,
+                    originalname: req.file.originalname,
+                    mimetype: req.file.mimetype
+                }
+            }
+
+            const result = await MessageService.addNewMessage(chatId, sender, type, content, chatKey, file);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});
@@ -17,10 +28,10 @@ class ChatController {
         }
     }
 
-    async addParticipant(req, res) {
+    async removeMessage(req, res) {
         try {
-            const {chatId, participant} = req.body;
-            const result = await ChatService.addParticipant(chatId, participant);
+            const {messageId} = req.body
+            const result = await MessageService.removeMessage(messageId);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});
@@ -33,10 +44,10 @@ class ChatController {
         }
     }
 
-    async removeParticipant(req, res) {
+    async getMessageListOfChat(req, res) {
         try {
-            const {chatId, participant} = req.body;
-            const result = await ChatService.removeParticipant(chatId, participant);
+            const {chatId} = req.body;
+            const result = await MessageService.getMessageListOfChat(chatId);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});
@@ -50,4 +61,4 @@ class ChatController {
     }
 }
 
-export default new ChatController();
+export default new MessageController();

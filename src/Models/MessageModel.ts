@@ -5,7 +5,8 @@ interface IMessage {
     chat: Types.ObjectId;
     sender: Types.ObjectId;
     type: 'text' | 'image' | 'video' | 'audio' | 'file';
-    content: string;
+    content?: string;
+    fileId?: Types.ObjectId;
     filename? : string;
     mimeType? : string;
     iv?: Buffer;
@@ -22,7 +23,8 @@ const messageSchema = new Schema<IMessage>({
         enum: ['text', 'image', 'video', 'audio', 'file'],
         required: true
     },
-    content: { type: String, required: true },
+    content: { type: String},
+    fileId: {type: Schema.Types.ObjectId},
     filename: { type: String},
     mimeType: { type: String},
     iv: { type: Buffer },
