@@ -128,6 +128,39 @@ class MessageService {
             }
         }
     }
+
+    async decryptTextMessage(messageId : Types.ObjectId, chatKey : Buffer) {
+        try {
+            const message = await Message.findById(messageId);
+
+            const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, message.iv);
+            let decrypted = decipher.update(message.content, 'base64', 'utf-8');
+            decrypted += decipher.final('utf-8');
+
+            return {
+                status: 'success',
+                message: 'Get plain message successfully',
+                data: decrypted
+            }
+
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async decryptedFileMessage(messageId : Types.ObjectId, chatKey: Buffer) {
+        try {
+            
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
 }
 
 export default new MessageService();

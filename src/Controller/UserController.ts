@@ -1,4 +1,5 @@
 import UserService from "../Services/UserService"; 
+import jwt from "jsonwebtoken";
 
 class UserController {
     async registerUser(req, res) {
@@ -32,6 +33,11 @@ class UserController {
             const result = await UserService.loginUser(account, password);
 
             if (result.status === 'success') {
+                const token = jwt.sign(
+                    { id: result.data },
+                    process.env.JWT_SECRET || 'your_jwt_secret',
+                    //{ expiresIn: '1d' }
+                );
                 res.status(200).json({
                     message: result.message
                 });

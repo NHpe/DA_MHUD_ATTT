@@ -60,7 +60,8 @@ class UserService {
 
             return {
                 status: 'success',
-                message: 'Login successfully'
+                message: 'Login successfully',
+                data: user._id
             }
 
         } catch (error) {

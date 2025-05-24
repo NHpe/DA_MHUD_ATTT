@@ -3,10 +3,14 @@ import path from 'path';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 
 import route from './Route/index';
 
-const uri = "mongodb+srv://trinhbao:trinhbao1234@cluster0.fbmzyor.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+dotenv.config({ path: path.resolve(__dirname, '../src/.env') });
+
+const uri = process.env.DATABASE_URI;
 const clientOptions = { serverApi: { version: "1" as const, strict: false, deprecationErrors: true } };
 
 function connect() {
@@ -23,9 +27,9 @@ connect();
 const app = express();
 
 app.use(cors());
-
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const port = 3000;
 
