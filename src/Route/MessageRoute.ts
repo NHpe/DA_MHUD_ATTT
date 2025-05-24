@@ -1,9 +1,10 @@
 import MessageController from "../Controller/MessageController";
 import { Router } from "express";
+import upload from "../Middleware/upload";
 
 const MessageRoute = Router();
 
-MessageRoute.post('/add-message', MessageController.addNewMessage);
+MessageRoute.post('/add-message', upload.single('file'), MessageController.addNewMessage);
 
 MessageRoute.post('/remove-massage', MessageController.removeMessage);
 

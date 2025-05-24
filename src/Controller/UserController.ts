@@ -35,9 +35,16 @@ class UserController {
             if (result.status === 'success') {
                 const token = jwt.sign(
                     { id: result.data },
-                    process.env.JWT_SECRET || 'your_jwt_secret',
+                    process.env.JWT_SECRET,
                     //{ expiresIn: '1d' }
                 );
+
+                res.cookie('jwt', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production', // đảm bảo chỉ HTTPS mới gửi cookie
+                    sameSite: 'strict', // chống CSRF
+                });
+
                 res.status(200).json({
                     message: result.message
                 });
@@ -81,6 +88,30 @@ class UserController {
                 message: error.message
             });
         }
+    }
+
+    async uploadAvatar(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+
+            const {userID} = req.body;
+            const {file} = req.file;
+
+            const result = await UserService.uploadAvatar(userID, file);
+
+            if (result.status === 'success') {
+                res.status(200).json({message: result.message});
+            } else {
+                res.status(500).json({message: result.message});
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            });
+        }
+        
     }
 }
 

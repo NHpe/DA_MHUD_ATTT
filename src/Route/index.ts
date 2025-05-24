@@ -4,15 +4,16 @@ import ChatRoute from "./ChatRoute";
 import MessageRoute from "./MessageRoute";
 
 import UserController from "../Controller/UserController";
+import authenticateJWT from "../Middleware/auth";
 
 function route(app) {
     app.post('/register', UserController.registerUser);
     app.post('/login', UserController.loginUser);
 
-    app.use('/user', UserRouter);
-    app.use('/friend', FriendRouter);
-    app.use('/chat', ChatRoute);
-    app.use('/message', MessageRoute);
+    app.use('/user', authenticateJWT, UserRouter);
+    app.use('/friend', authenticateJWT, FriendRouter);
+    app.use('/chat', authenticateJWT, ChatRoute);
+    app.use('/message', authenticateJWT, MessageRoute);
 
     app.get('/', (req, res) => {
         res.send('Hello World!');

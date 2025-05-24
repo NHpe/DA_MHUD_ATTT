@@ -1,5 +1,4 @@
 import { Schema, model, Types } from "mongoose";
-import Friend from "./FriendModel";
 
 // Create interface
 interface IUser {
@@ -9,7 +8,11 @@ interface IUser {
     friendList: {
         type: Types.ObjectId,
         ref: 'User'}[];
-    };
+    avatar?: {
+        data: Buffer,
+        mimetype: string
+    }
+};
 
 
 // Create schema
@@ -20,7 +23,11 @@ const userSchema = new Schema<IUser>({
     friendList: [{
         type: Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    avatar: {
+        data: Buffer,
+        mimetype: String
+    }
 });
 
 // Create model

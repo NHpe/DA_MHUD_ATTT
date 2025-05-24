@@ -1,5 +1,7 @@
 import User from '../Models/UserModel';
 import crypto from 'crypto';
+import multer from 'multer';
+import { Types } from 'mongoose';
 
 class UserService {
     async registerUser(account, password) {
@@ -138,6 +140,27 @@ class UserService {
             return {
                 status: 'warning',
                 message: 'Password do not correctly'
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async uploadAvatar(userID : Types.ObjectId, file) {
+        try {
+            const user = await User.findByIdAndUpdate(userID, {avatar: {
+                data: file.Buffer,
+                mimetype: file.mimetype
+            }});
+
+            await user.save();
+
+            return {
+                status: 'success',
+                message: 'Upload avatar successfully'
             }
         } catch (error) {
             return {

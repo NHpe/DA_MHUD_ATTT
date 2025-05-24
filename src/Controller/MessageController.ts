@@ -1,5 +1,4 @@
 import MessageService from "../Services/MessageService";
-import multer from "multer";
 
 class MessageController {
     async addNewMessage(req, res) {
