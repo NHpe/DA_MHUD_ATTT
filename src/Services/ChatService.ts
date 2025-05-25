@@ -16,14 +16,11 @@ class ChatService {
             else {
                 chatKey = Buffer.from(crypto.randomFillSync(new Uint8Array(32))); // AES-256
             }
-            const iv = Buffer.from(crypto.randomFillSync(new Uint8Array(16)));
-
             const chat = new Chat({
                 name,
                 type: isSingle ? 'single' : 'group',
                 participantList,
-                chatKey,
-                iv
+                chatKey
             });
 
             await chat.save();

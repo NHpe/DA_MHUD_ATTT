@@ -17,7 +17,7 @@ class MessageService {
                 encrypted += cipher.final('base64');
 
                 const newMessage = new Message({
-                    chat: chatId,
+                    chatId,
                     sender,
                     type,
                     content: encrypted,
@@ -53,7 +53,7 @@ class MessageService {
                 });
 
                 const newMessage = new Message({
-                    chat: chatId,
+                    chatId,
                     sender,
                     fileId,
                     fileName: file.originalname,

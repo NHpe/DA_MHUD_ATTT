@@ -19,7 +19,7 @@ interface IUser {
 const userSchema = new Schema<IUser>({
     account: {type: String, required: true},
     password: {type: String, required: true},
-    name: String,
+    name: {type: String},
     friendList: [{
         type: Types.ObjectId,
         ref: 'User'

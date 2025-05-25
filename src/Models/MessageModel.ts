@@ -2,25 +2,25 @@
 import { Schema, model, Types, Model } from 'mongoose';
 
 interface IMessage {
-    chat: Types.ObjectId;
+    chatId: Types.ObjectId;
     sender: Types.ObjectId;
-    type: 'text' | 'image' | 'video' | 'audio' | 'file';
+    type: 'text' | 'file';
     content?: string;
     fileId?: Types.ObjectId;
     fileName? : string;
     mimeType? : string;
-    iv?: Buffer;
+    iv: Buffer;
     time: Date;
 }
 
 type MessageModel = Model<IMessage>;
 
 const messageSchema = new Schema<IMessage>({
-    chat: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
+    chatId: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type: {
         type: String,
-        enum: ['text', 'image', 'video', 'audio', 'file']
+        enum: ['text', 'file']
     },
     content: { type: String},
     fileId: {type: Schema.Types.ObjectId},
