@@ -47,14 +47,42 @@ class MessageController {
 
     async getMessageListOfChat(req, res) {
         try {
-            const {chatId} = req.body;
-            const result = await MessageService.getMessageListOfChat(chatId);
+            const {chatId, chatKey} = req.body;
+
+            const chatKeyBuffer = Buffer.from(chatKey, 'base64');
+
+            const result = await MessageService.getMessageListOfChat(chatId, chatKeyBuffer);
 
             if (result.status === 'success') {
-                return res.status(200).json({message: result.message});
+                return res.status(200).json({
+                    message: result.message,
+                    data: result.data
+                });
             }
             else {
                 return res.status(500).json({message: result.message});
+            }
+        } catch (error) {
+            return res.status(500).json({message: error.message});
+        }
+    }
+
+    async decryptFileAndDownload(req, res) {
+        try {
+            const {fileId, fileName, mimeType, chatKey, iv} = req.body;
+
+            const chatKeyBuffer = Buffer.from(chatKey, 'base64');
+            const ivBuffer = Buffer.from(iv, 'base64');
+
+            const result = await MessageService.decryptedFileMessage(fileId, chatKeyBuffer, ivBuffer);
+
+            if (result) {
+                res.setHeader('Content-Type', mimeType);
+                res.setHeader(
+                    'Content-Disposition',
+                    `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`
+                );
+                res.send(result);
             }
         } catch (error) {
             return res.status(500).json({message: error.message});

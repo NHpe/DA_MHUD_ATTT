@@ -1,9 +1,9 @@
 import { Types, connection, mongo } from "mongoose";
-import { GridFSBucket } from "mongodb";
+import { GridFSBucket, ObjectId } from "mongodb";
 import { Message } from "../Models/MessageModel";
 
 import crypto, { randomBytes, randomFill } from 'node:crypto';
-import { time } from "node:console";
+import fs from 'fs';
 
 class MessageService {
     async addNewMessage(chatId : Types.ObjectId, sender : Types.ObjectId, type : string, content : string, chatKey : Buffer, file) {
@@ -105,15 +105,46 @@ class MessageService {
         }
     }
 
-    async getMessageListOfChat(chatId: Types.ObjectId) {
+    async getMessageListOfChat(chatId: Types.ObjectId, chatKey : Buffer) {
         try {
             const data = await Message.find({chat: chatId});
 
-            if (data) {
+            let messageList = []
+
+            for (const message of data) {
+                if (message.type === 'text') {
+                    const iv = message.iv; // Kiểu Buffer
+                    const encryptedContent = message.content;
+
+                    try {
+                        const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, iv);
+                        let decrypted = decipher.update(encryptedContent, 'base64', 'utf-8');
+                        decrypted += decipher.final('utf-8');
+
+                        messageList.push({
+                            ...message.toObject(),
+                            content: decrypted
+                        });
+                    } catch (err) {
+                        messageList.push({
+                            ...message.toObject(),
+                            content: '[Failed to decrypt]'
+                        });
+                    }
+                } else {
+                    // Nếu là file, có thể bạn muốn giữ nguyên content là buffer hoặc base64
+                    messageList.push({
+                        ...message.toObject(),
+                        content: '[Encrypted file or unsupported type]'
+                    });
+                }
+            }
+
+            if (messageList.length > 0) {
                 return {
                     status: 'success',
                     message: 'Message list retrieved successfully',
-                    data: data
+                    data: messageList
                 }
             }
 
@@ -129,31 +160,33 @@ class MessageService {
         }
     }
 
-    async decryptTextMessage(messageId : Types.ObjectId, chatKey : Buffer) {
+    async decryptedFileMessage(fileId : Types.ObjectId, chatKey: Buffer, fileIv : Buffer) {
         try {
-            const message = await Message.findById(messageId);
+            const bucket = new mongo.GridFSBucket(connection.db, {
+                bucketName: 'files'
+            });
 
-            const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, message.iv);
-            let decrypted = decipher.update(message.content, 'base64', 'utf-8');
-            decrypted += decipher.final('utf-8');
+            const downloadStream = bucket.openDownloadStream(new Types.ObjectId(fileId));
 
-            return {
-                status: 'success',
-                message: 'Get plain message successfully',
-                data: decrypted
-            }
+            const chunks = [];
+            downloadStream.on('data', chunk => chunks.push(chunk));
 
-        } catch (error) {
-            return {
-                status: 'error',
-                message: error.message
-            }
-        }
-    }
+            return new Promise((resolve, reject) => {
+                downloadStream.on('end', () => {
+                    const encryptedBuffer = Buffer.concat(chunks);
+                    
+                    // Giải mã
+                    const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, fileIv);
+                    const decryptedBuffer = Buffer.concat([
+                        decipher.update(encryptedBuffer),
+                        decipher.final()
+                    ]);
 
-    async decryptedFileMessage(messageId : Types.ObjectId, chatKey: Buffer) {
-        try {
-            
+                    resolve(decryptedBuffer); // Trả về hoặc gửi buffer này xuống client
+                });
+
+                downloadStream.on('error', reject);
+            });
         } catch (error) {
             return {
                 status: 'error',

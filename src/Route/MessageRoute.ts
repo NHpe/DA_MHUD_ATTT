@@ -8,6 +8,8 @@ MessageRoute.post('/add-message', upload.single('file'), MessageController.addNe
 
 MessageRoute.post('/remove-message', MessageController.removeMessage);
 
-MessageRoute.post('get-message-chat', MessageController.getMessageListOfChat);
+MessageRoute.post('/get-message-chat', MessageController.getMessageListOfChat);
+
+MessageRoute.post('/download-file', MessageController.decryptFileAndDownload);
 
 export default MessageRoute;

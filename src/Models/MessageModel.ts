@@ -7,7 +7,7 @@ interface IMessage {
     type: 'text' | 'image' | 'video' | 'audio' | 'file';
     content?: string;
     fileId?: Types.ObjectId;
-    filename? : string;
+    fileName? : string;
     mimeType? : string;
     iv?: Buffer;
     time: Date;
@@ -24,7 +24,7 @@ const messageSchema = new Schema<IMessage>({
     },
     content: { type: String},
     fileId: {type: Schema.Types.ObjectId},
-    filename: { type: String},
+    fileName: { type: String},
     mimeType: { type: String},
     iv: { type: Buffer },
     time: { type: Date, default: Date.now }
