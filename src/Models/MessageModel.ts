@@ -20,8 +20,7 @@ const messageSchema = new Schema<IMessage>({
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type: {
         type: String,
-        enum: ['text', 'image', 'video', 'audio', 'file'],
-        required: true
+        enum: ['text', 'image', 'video', 'audio', 'file']
     },
     content: { type: String},
     fileId: {type: Schema.Types.ObjectId},
