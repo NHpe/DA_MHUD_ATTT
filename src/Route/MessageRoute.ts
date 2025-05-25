@@ -6,7 +6,7 @@ const MessageRoute = Router();
 
 MessageRoute.post('/add-message', upload.single('file'), MessageController.addNewMessage);
 
-MessageRoute.post('/remove-massage', MessageController.removeMessage);
+MessageRoute.post('/remove-message', MessageController.removeMessage);
 
 MessageRoute.post('get-message-chat', MessageController.getMessageListOfChat);
 

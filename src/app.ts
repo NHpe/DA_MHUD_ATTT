@@ -31,10 +31,8 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const port = 3000;
-
 route(app);
 
-app.listen(port, () => {
-    return console.log(`Listening at port : ${port}`);
+app.listen(Number(process.env.PORT), () => {
+    return console.log(`Listening at port : ${process.env.PORT}`);
 });

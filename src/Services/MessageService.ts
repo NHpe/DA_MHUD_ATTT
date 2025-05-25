@@ -8,7 +8,7 @@ import { time } from "node:console";
 class MessageService {
     async addNewMessage(chatId : Types.ObjectId, sender : Types.ObjectId, type : string, content : string, chatKey : Buffer, file) {
         try {
-            const iv = crypto.randomFillSync(new Uint8Array(16))
+            const iv = Buffer.from(crypto.randomFillSync(new Uint8Array(16)));
             if (type === 'text') {
                 // Thự hiện mã hóa tin nhắn dạng text
                 const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, iv);

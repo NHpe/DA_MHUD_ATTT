@@ -1,6 +1,11 @@
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import passport from 'passport';
 import User from '../Models/UserModel';
+import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 
 const cookieExtractor = function(req) {
     var token = null;
@@ -12,7 +17,7 @@ const cookieExtractor = function(req) {
 
 const opts = {
     jwtFromRequest: cookieExtractor,
-    secretOrKey: process.env.JWT_SECRET,
+    secretOrKey: process.env.JWT_SECRET || '123456',
 };
 
 passport.use(
@@ -28,6 +33,6 @@ passport.use(
     })
 );
 
-const authenticateJWT = passport.authenticate('jwt');
+const authenticateJWT = passport.authenticate('jwt', { session: false });
 
 export default authenticateJWT;

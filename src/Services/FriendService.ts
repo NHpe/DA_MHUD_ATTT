@@ -124,7 +124,7 @@ class FriendService {
             });
 
             // Xoá trong danh sách bạn bè
-            await User.deleteOne({
+            await User.updateOne({
                 _id: fromUser
                 }, {
                     $pull: {
@@ -132,7 +132,7 @@ class FriendService {
                     }
                 });
 
-            await User.deleteOne({
+            await User.updateOne({
                 _id: toUser
                 }, {
                     $pull: {

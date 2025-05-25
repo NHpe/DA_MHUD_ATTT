@@ -14,9 +14,9 @@ class ChatService {
                 chatKey = crypto.scryptSync(sortedUserId, 'salt', 32); // AES-256
             }
             else {
-                chatKey = crypto.randomFillSync(new Uint8Array(32)) // AES-256
+                chatKey = Buffer.from(crypto.randomFillSync(new Uint8Array(32))); // AES-256
             }
-            const iv = crypto.randomFillSync(new Uint8Array(16))
+            const iv = Buffer.from(crypto.randomFillSync(new Uint8Array(16)));
 
             const chat = new Chat({
                 name,
@@ -65,9 +65,7 @@ class ChatService {
 
     async removeParticipant(chatId: Types.ObjectId, participant: Types.ObjectId) {
         try {
-            const result = await Chat.findByIdAndDelete(chatId, {
-                participantList: { $pull : { _id : participant}}
-            });
+            const result = await Chat.findByIdAndUpdate(chatId, { $pull: { participantList: participant } });
 
             if (result) {
                 return {

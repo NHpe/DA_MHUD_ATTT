@@ -5,6 +5,8 @@ class MessageController {
         try {
             const {chatId, sender, type, content, chatKey} = req.body;
 
+            const chatKeyBuffer = Buffer.from(chatKey, 'base64');
+
             let file = null;
             if (req.file) {
                 file = {
@@ -14,7 +16,7 @@ class MessageController {
                 }
             }
 
-            const result = await MessageService.addNewMessage(chatId, sender, type, content, chatKey, file);
+            const result = await MessageService.addNewMessage(chatId, sender, type, content, chatKeyBuffer, file);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});

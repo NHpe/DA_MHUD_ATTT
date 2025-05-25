@@ -35,7 +35,7 @@ class UserController {
             if (result.status === 'success') {
                 const token = jwt.sign(
                     { id: result.data },
-                    process.env.JWT_SECRET,
+                    '123456',
                     //{ expiresIn: '1d' }
                 );
 
