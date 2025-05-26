@@ -1,5 +1,7 @@
 import UserService from "../Services/UserService"; 
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
 class UserController {
     async registerUser(req, res) {
@@ -35,7 +37,7 @@ class UserController {
             if (result.status === 'success') {
                 const token = jwt.sign(
                     { id: result.data },
-                    '123456',
+                    process.env.JWT_SECRET || 'default',
                     //{ expiresIn: '1d' }
                 );
 
