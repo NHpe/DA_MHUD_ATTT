@@ -65,10 +65,10 @@ class UserController {
         }
     }
 
-    async getFriendList(req, res) {
+    async getFriendData(req, res) {
         try {
-            const {userId} = req.body;
-            const result = await UserService.getFriendList(userId);
+            const {friendList} = req.body;
+            const result = await UserService.getFriendData(friendList);
 
             if (result.status === 'success') {
                 res.status(200).json({
@@ -88,6 +88,32 @@ class UserController {
             res.status(500).json({
                 message: error.message
             });
+        }
+    }
+
+    async searchUser(req, res) {
+        try {
+            const {q} = req.query;
+            const result = await UserService.searchUser(q);
+            if (result.status === 'success') {
+                res.status(200).json({
+                    message: result.message,
+                    results: result.data
+                });
+            } else if (result.status === 'error') {
+                res.status(500).json({
+                    message: result.message
+                });
+            } else {
+                res.status(400).json({
+                    message: result.message,
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            });
+            
         }
     }
 

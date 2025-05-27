@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import HomePage from "../pages/HomePage";
+import FriendsPage from "../pages/FriendPage";
 
 const Routes = () => {
   const { user } = useAuth();
@@ -16,6 +17,10 @@ const Routes = () => {
         {
           path: "/",
           element: <HomePage />,
+        },
+        {
+          path: "/friends",
+          element: <FriendsPage />,
         },
         {
           path: "/profile",

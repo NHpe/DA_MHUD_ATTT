@@ -91,21 +91,42 @@ class UserService {
         }
     }
 
-    async getFriendList(userId) {
+    async getFriendData(friendList : Types.ObjectId[]) {
         try {
-            const user = await User.findById(userId);
-
-            const friendList = user.friendList.map(async friend => {
-                const friend_1 = await User.findById(friend);
-                return {
-                    name: friend_1.name,
-                };
-            });
+            const friends = await User.find({
+                _id: { $in: friendList }});
+            
+            const friendListData = friends.map(friend => ({
+                _id: friend._id,
+                account: friend.account,
+                name: friend.name,
+                avatar: friend.avatar
+            }));
 
             return {
                 status: 'success',
                 message: 'Get friend list successfully',
-                data: friendList
+                data: friendListData
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async searchUser(query) {
+        try {
+            const regex = new RegExp(query, 'i'); // Tạo biểu thức chính quy không phân biệt chữ hoa chữ thường
+            const users = await User.find(
+                { name: regex }
+            ).select('_id name');
+
+            return {
+                status: 'success',
+                message: 'Search user successfully',
+                data: users
             }
         } catch (error) {
             return {

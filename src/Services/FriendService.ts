@@ -151,6 +151,27 @@ class FriendService {
             }
         }
     }
+
+    async getFriendRequests(userId) {
+        try {
+            const friendRequests = await Friend.find({
+                toUser: userId,
+                status: 'requested'
+            }).populate('fromUser', '_id account name avatar');
+
+            return {
+                status: 'success',
+                message: 'Get friend requests successfully',
+                data: friendRequests
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+    
 }
 
 export default new FriendService();

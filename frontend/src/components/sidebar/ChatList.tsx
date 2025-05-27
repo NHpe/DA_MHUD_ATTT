@@ -20,10 +20,9 @@ const ChatList = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const res = await axios.post('http://localhost:3000/chat/get-chat-list', {
-          withCredentials: true,
-          chatList: user?.chatList
-        });
+        const res = await axios.post('http://localhost:3000/chat/get-chat-list', 
+        {chatList: user?.chatList}, 
+        {withCredentials: true},);
         setChats(res.data.chats);
       } catch (err) {
         console.error('Lỗi khi tải danh sách cuộc trò chuyện:', err);

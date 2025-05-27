@@ -68,6 +68,23 @@ class FriendController {
             return res.status(500).json( {message: error.message });
         }
     }
+
+    async getFriendRequests(req, res) {
+        try {
+            const { userId } = req.body;
+            const result = await FriendService.getFriendRequests(userId);
+
+            if (result.status === 'success') {
+                return res.status(200).json({ message: result.message, data: result.data });
+            } else if (result.status === 'error') {
+                return res.status(500).json({ message: result.message });
+            } else {
+                return res.status(400).json({ message: result.message });
+            }
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
 }
 
 export default new FriendController();

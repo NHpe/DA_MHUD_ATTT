@@ -37,7 +37,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   // Gọi API để xác thực từ cookie JWT
   const fetchUser = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/auth/", {
+      const res = await axios.get("http://localhost:3000/auth", {
         withCredentials: true, // Gửi kèm cookie JWT
       });
       setUser(res.data.user); // hoặc res.data tùy backend
