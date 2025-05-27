@@ -1,0 +1,56 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Types } from 'mongoose';
+
+interface Message {
+    _id: Types.ObjectId;
+    chatId: Types.ObjectId;
+    sender: Types.ObjectId;
+    type: 'text' | 'file';
+    content?: string;
+    fileId?: Types.ObjectId;
+    fileName? : string;
+    mimeType? : string;
+    iv: Buffer;
+    time: Date;
+}
+
+interface Props {
+  chatId: Types.ObjectId;
+  chatKey: Buffer
+}
+
+const MessageList = ({ chatId, chatKey }: Props) => {
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.post('http://localhost:3000/message/get-message-chat', 
+        {chatId, chatKey},
+        {withCredentials: true,});
+        setMessages(res.data.data);
+      } catch (err) {
+        console.error('Lỗi khi tải tin nhắn:', err);
+      }
+    };
+
+    if (chatId) {
+      fetchMessages();
+    }
+  }, [chatId, chatKey]);
+
+  return (
+    <div className="h-full p-4 overflow-y-auto space-y-2">
+      {messages.map((msg) => (
+        <div key={msg._id.toString()} className="p-2 bg-gray-100 rounded shadow">
+          <div className="text-sm text-gray-600">{msg.sender.toString()}</div>
+          <div className="text-base">{msg.content}</div>
+          <div className="text-xs text-gray-400 text-right">{new Date(msg.time).toLocaleTimeString()}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default MessageList;

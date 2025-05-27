@@ -1,24 +1,62 @@
 import { useNavigate } from "react-router-dom";
-import ChatList from "../components/sidebar/ChatList";
+import { useState } from "react";
+import ChatList from "../components/ChatList";
+import { Types } from "mongoose";
+import MessageList from "../components/MessageList";
+import MessageInput from "../components/MessageInput";
+
+interface Chat {
+  _id: Types.ObjectId;
+  name?: string;
+  participantList: Types.ObjectId[];
+  chatKey: Buffer;
+  type: 'single' | 'group';
+}
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
 
-  const handleFriend = () => {
-    navigate("/friends");
+  const handleChatClick = (chat : Chat) => {
+    setSelectedChat(chat);
+  };
+
+  const handleStartNewChat = () => {
+    navigate('/chat/new');
   };
 
   return (
     <div className="flex h-screen">
-      <aside className="w-1/3 border-r p-4">
-        <h2 className="font-bold text-xl mb-2">Trò chuyện</h2>
-        <ChatList />
+      <aside className="w-1/3 border-r p-4 flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Danh sách trò chuyện</h2>
+          <button
+            onClick={handleStartNewChat}
+            className="bg-green-500 text-white px-3 py-1 rounded text-sm"
+          >
+            + Mới
+          </button>
+        </div>
+        <ChatList onSelectChat={handleChatClick} />
       </aside>
-      <button onClick={handleFriend} className="absolute top-4 right-4 bg-blue-500 text-white px-4 py-2 rounded">
-        Quản lý bạn bè
-      </button>
-      <main className="flex-1 flex items-center justify-center text-gray-500">
-        <p>Chọn một cuộc trò chuyện để bắt đầu</p>
+
+      <main className="flex-1 flex flex-col">
+        {!selectedChat ? (
+          <div className="flex-1 flex items-center justify-center text-gray-500">
+            Chọn một cuộc trò chuyện để bắt đầu
+          </div>
+        ) : (
+          <><div className="flex-1 flex items-center justify-center text-gray-500">
+              {selectedChat.name}
+            </div><>
+            <div className="flex-1 overflow-y-auto">
+              <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} />
+            </div>
+            <div className="border-t p-4">
+              <MessageInput chatId={selectedChat._id} chatKey={selectedChat.chatKey} />
+            </div>
+          </></>
+        )}
       </main>
     </div>
   );

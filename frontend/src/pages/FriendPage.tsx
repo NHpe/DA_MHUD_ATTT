@@ -1,6 +1,6 @@
-import FriendList from "../components/sidebar/FriendList";
-import FriendSearch from "../components/sidebar/FriendSearch";
-import PendingFriendList from "../components/sidebar/PendingFriendList";
+import FriendList from "../components/FriendList";
+import FriendSearch from "../components/FriendSearch";
+import PendingFriendList from "../components/PendingFriendList";
 
 const FriendsPage = () => {
   return (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../../provider/AuthProvider';
+import { useAuth } from '../provider/AuthProvider';
 import { Types } from 'mongoose';
 
 interface SearchResult {

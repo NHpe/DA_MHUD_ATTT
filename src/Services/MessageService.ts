@@ -107,7 +107,7 @@ class MessageService {
 
     async getMessageListOfChat(chatId: Types.ObjectId, chatKey : Buffer) {
         try {
-            const data = await Message.find({chat: chatId});
+            const data = await Message.find({chatId}).populate('sender', 'name');
 
             let messageList = []
 

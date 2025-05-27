@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../provider/AuthProvider';
+import { useAuth } from '../provider/AuthProvider';
 import { Types } from 'mongoose';
 
 interface Chat {
@@ -12,17 +11,22 @@ interface Chat {
   type: 'single' | 'group';
 }
 
-const ChatList = () => {
+
+interface ChatListProps {
+  onSelectChat: (chat: Chat) => void;
+}
+
+const ChatList: React.FC<ChatListProps> = ({ onSelectChat }) => {
+  // component logic
   const [chats, setChats] = useState<Chat[]>([]);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchChats = async () => {
       try {
         const res = await axios.post('http://localhost:3000/chat/get-chat-list', 
-        {chatList: user?.chatList}, 
-        {withCredentials: true},);
+          {chatList: user?.chatList}, 
+          {withCredentials: true},);
         setChats(res.data.chats);
       } catch (err) {
         console.error('Lỗi khi tải danh sách cuộc trò chuyện:', err);
@@ -34,19 +38,13 @@ const ChatList = () => {
     }
   }, [user]);
 
-  const handleSelectChat = (chatId: Types.ObjectId) => {
-    navigate(`/chat/${chatId}`);
-  };
-
   return (
-    <div className="flex flex-col gap-2">
+    <div>
       {chats.map((chat) => (
-        <button
-          key={chat._id.toString()}
-          onClick={() => handleSelectChat(chat._id)}
-          className="text-left p-2 border rounded hover:bg-gray-100"
+        <button key={chat._id.toString()}
+          onClick={() => onSelectChat(chat)}
         >
-          {chat.name ? chat.name : `Cuộc trò chuyện`}
+          {chat.name}
         </button>
       ))}
     </div>
