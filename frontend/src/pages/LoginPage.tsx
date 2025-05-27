@@ -1,19 +1,29 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../provider/AuthProvider';
 
 const LoginPage = () => {
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await axios.post(
         'http://localhost:3000/login',
-        { account, password }
+        { account, password },
+        { withCredentials: true }
       );
+      
+      const res = await axios.get('http://localhost:3000/auth', {
+        withCredentials: true,
+      });
+
+      setUser(res.data.user);  // gán user vào AuthProvider
+
       navigate('/');
     } catch (err) {
       alert('Đăng nhập thất bại');

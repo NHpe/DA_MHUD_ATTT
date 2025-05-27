@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { Chat } from "../Models/ChatModel";
+import User from "../Models/UserModel";
 
-import crypto, { randomBytes, randomFill } from 'node:crypto'
-import multer from "multer";
+import crypto from 'node:crypto'
 
 class ChatService {
     async createChat(isSingle: boolean, name: string, participantList: Types.ObjectId[]) {
@@ -24,6 +24,16 @@ class ChatService {
             });
 
             await chat.save();
+
+            for (const participant of participantList) {
+                await User.updateOne({
+                    _id: participant
+                }, {
+                    $push: {
+                        chatList: chat._id
+                    }
+                });
+            }
 
             return {
                 status: 'success',
@@ -47,6 +57,14 @@ class ChatService {
                 }
             });
 
+            await User.updateOne({
+                _id: participant
+            }, {
+                $push: {
+                    chatList: chatId
+                }
+            });
+
             return {
                 status: 'success',
                 message: 'Participant added successfully'
@@ -64,6 +82,14 @@ class ChatService {
         try {
             const result = await Chat.findByIdAndUpdate(chatId, { $pull: { participantList: participant } });
 
+            await User.updateOne({
+                _id: participant,
+            }, {
+                $pull: {
+                    chatList: chatId
+                }
+            });
+
             if (result) {
                 return {
                     status: 'success',
@@ -74,6 +100,24 @@ class ChatService {
             return {
                 status: 'error',
                 message: 'Failed to remove participant or participant not found'
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async getChatList(chatList : Types.ObjectId[]) {
+        try {
+            // Tìm chats
+            const chats = await Chat.find({ _id: { $in: chatList } });
+
+            return {
+                status: 'success',
+                message: 'Chat list retrieved successfully',
+                data: chats
             }
         } catch (error) {
             return {

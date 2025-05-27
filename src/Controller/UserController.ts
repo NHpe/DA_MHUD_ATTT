@@ -1,7 +1,5 @@
 import UserService from "../Services/UserService"; 
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
-dotenv.config();
 
 class UserController {
     async registerUser(req, res) {
@@ -37,18 +35,19 @@ class UserController {
             if (result.status === 'success') {
                 const token = jwt.sign(
                     { id: result.data },
-                    process.env.JWT_SECRET || 'default',
-                    //{ expiresIn: '1d' }
+                    'default',
+                    { expiresIn: '1d' }
                 );
 
                 res.cookie('jwt', token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production', // đảm bảo chỉ HTTPS mới gửi cookie
                     sameSite: 'strict', // chống CSRF
+                    maxAge: 24 * 60 * 60 * 1000,
                 });
 
                 res.status(200).json({
-                    message: result.message
+                    message: result.message,
                 });
             } else if (result.status === 'error') {
                 res.status(500).json({

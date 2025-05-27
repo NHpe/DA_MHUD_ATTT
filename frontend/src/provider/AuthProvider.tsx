@@ -11,6 +11,9 @@ interface User {
     friendList: {
       type: Types.ObjectId,
       ref: 'User'}[];
+    chatList: {
+      type: Types.ObjectId,
+      ref: 'Chat'}[];
     avatar?: {
       data: Buffer,
       mimetype: string
@@ -20,20 +23,15 @@ interface User {
 interface AuthContextType {
     user: User | null; // Dữ liệu người dùng
     setUser: (user: User | null) => void; // Hàm cập nhật người dùng
-    token: string | null;
-    setToken: (token: string | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {}, // placeholder function
-  token: null,
-  setToken: () => {}, // placeholder function
 });
 
 const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
   const [user, setUser] = useState<User | null>(null);    
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Gọi API để xác thực từ cookie JWT
@@ -43,12 +41,8 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
         withCredentials: true, // Gửi kèm cookie JWT
       });
       setUser(res.data.user); // hoặc res.data tùy backend
-      if (res.data.token) {
-        setToken(res.data.token);
-      }
     } catch (err) {
       setUser(null);
-      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -62,14 +56,12 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     () => ({
       user,
       setUser,
-      token,
-      setToken,
       loading,
       isAuthenticated: !!user,
       refreshUser: fetchUser,
       //logout,
     }),
-    [user, token, loading]
+    [user, loading]
   );
 
   return (

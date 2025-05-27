@@ -8,6 +8,9 @@ interface IUser {
     friendList: {
         type: Types.ObjectId,
         ref: 'User'}[];
+    chatList: {
+        type: Types.ObjectId,
+        ref: 'Chat'}[];
     avatar?: {
         data: Buffer,
         mimetype: string
@@ -23,6 +26,10 @@ const userSchema = new Schema<IUser>({
     friendList: [{
         type: Types.ObjectId,
         ref: 'User'
+    }],
+    chatList: [{
+        type: Types.ObjectId,
+        ref: 'Chat'
     }],
     avatar: {
         data: Buffer,

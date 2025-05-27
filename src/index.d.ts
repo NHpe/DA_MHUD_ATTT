@@ -11,6 +11,9 @@ declare global {
         friendList: {
             type: Types.ObjectId,
             ref: 'User'}[];
+        chatList: {
+            type: Types.ObjectId,
+            ref: 'Chat'}[];
         avatar?: {
             data: Buffer,
             mimetype: string

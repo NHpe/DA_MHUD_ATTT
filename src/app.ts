@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import passport from 'passport';
 
 import route from './Route/index';
 
@@ -34,6 +35,7 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 route(app);
 

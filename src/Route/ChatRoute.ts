@@ -9,4 +9,6 @@ ChatRoute.post('/add-participant', ChatController.addParticipant);
 
 ChatRoute.post('/remove-participant', ChatController.removeParticipant);
 
+ChatRoute.post('/get-chat-list', ChatController.getChatList);
+
 export default ChatRoute;
