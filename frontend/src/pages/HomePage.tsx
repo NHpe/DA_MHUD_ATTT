@@ -40,7 +40,7 @@ const HomePage = () => {
   };
 
   const handleStartNewChat = () => {
-    navigate('/chat/new');
+    navigate('/new-chat');
   };
 
   const handleMessageSent = (newMessage: Message) => {
