@@ -37,8 +37,8 @@ const FriendList = () => {
     const fetchFriends = async () => {
       try {
         const res = await axios.post(
-          'http://localhost:3000/user/get-friend-data',
-          { friendList: user?.friendList },
+          'http://localhost:3000/user/get-users-data',
+          { userList: user?.friendList },
           { withCredentials: true }
         );
         setFriends(res.data.data);
@@ -56,7 +56,7 @@ const FriendList = () => {
     <div className="mt-2">
       {friends.map((friend) => (
         <div key={friend._id.toString()} className="p-2 border rounded mb-1">
-          <p className="font-semibold">{friend.name || friend.account}</p>
+          <p className="font-semibold">{friend.name}</p>
           <button
             onClick={() => handleUnfriend(friend._id)}
             className="text-sm text-blue-600 hover:underline"

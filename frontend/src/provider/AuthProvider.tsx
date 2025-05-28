@@ -23,11 +23,13 @@ interface User {
 interface AuthContextType {
     user: User | null; // Dữ liệu người dùng
     setUser: (user: User | null) => void; // Hàm cập nhật người dùng
+    refreshUser: () => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {}, // placeholder function
+  refreshUser: () => {}
 });
 
 const AuthProvider = ({ children }: PropsWithChildren<{}>) => {

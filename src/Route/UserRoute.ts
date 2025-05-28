@@ -4,7 +4,7 @@ import upload from "../Middleware/upload";
 
 const UserRouter = Router();
 
-UserRouter.post('/get-friend-data', UserController.getFriendData);
+UserRouter.post('/get-users-data', UserController.getUsersData);
 
 UserRouter.post('/upload-avatar', upload.single('avatar'), UserController.uploadAvatar);
 

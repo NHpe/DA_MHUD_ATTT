@@ -65,10 +65,10 @@ class UserController {
         }
     }
 
-    async getFriendData(req, res) {
+    async getUsersData(req, res) {
         try {
-            const {friendList} = req.body;
-            const result = await UserService.getFriendData(friendList);
+            const {userList} = req.body;
+            const result = await UserService.getUsersData(userList);
 
             if (result.status === 'success') {
                 res.status(200).json({

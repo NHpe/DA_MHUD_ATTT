@@ -126,6 +126,32 @@ class ChatService {
             }
         }
     }
+
+    async changeChatName(chatId : Types.ObjectId, newName : string) {
+        try {
+            const chat = await Chat.findById(chatId);
+            if (!chat) throw new Error('Chat not found');
+
+            chat.name = newName;
+            await chat.save();
+
+            if (chat) {
+                return {
+                    status: 'success',
+                    message: 'Changed name successfully'
+                }
+            }
+            return {
+                status: 'error',
+                message: 'Failed to change name'
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
 }
 
 export default new ChatService();

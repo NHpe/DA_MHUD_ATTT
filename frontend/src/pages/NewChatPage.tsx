@@ -15,7 +15,7 @@ interface User {
 }
 
 const NewChatPage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [chatName, setChatName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const navigate = useNavigate();
@@ -36,6 +36,7 @@ const NewChatPage = () => {
         },
         { withCredentials: true }
       );
+      refreshUser();
       navigate('/');
     } catch (err) {
       console.error('Lỗi khi tạo cuộc trò chuyện:', err);

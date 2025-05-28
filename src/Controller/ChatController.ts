@@ -66,6 +66,24 @@ class ChatController {
             
         }
     }
+
+    async changeChatName(req, res) {
+        try {
+            const {chatId, newName} = req.body;
+            const result = await ChatService.changeChatName(chatId, newName);
+
+            if (result.status === 'success') {
+                return res.status(200).json({message: result.message});
+            } else if (result.status === 'error') {
+                return res.status(500).json({message: result.message});
+            } else {
+                return res.status(400).json({message: result.message});
+            }
+        } catch (error) {
+            return res.status(500).json({message: error.message});
+            
+        }
+    }
 }
 
 export default new ChatController();

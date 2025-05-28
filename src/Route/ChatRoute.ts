@@ -11,4 +11,6 @@ ChatRoute.post('/remove-participant', ChatController.removeParticipant);
 
 ChatRoute.post('/get-chat-list', ChatController.getChatList);
 
+ChatRoute.post('/change-chat-name', ChatController.changeChatName);
+
 export default ChatRoute;

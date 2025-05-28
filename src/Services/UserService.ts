@@ -91,22 +91,22 @@ class UserService {
         }
     }
 
-    async getFriendData(friendList : Types.ObjectId[]) {
+    async getUsersData(userList : Types.ObjectId[]) {
         try {
-            const friends = await User.find({
-                _id: { $in: friendList }});
+            const users = await User.find({
+                _id: { $in: userList }});
             
-            const friendListData = friends.map(friend => ({
-                _id: friend._id,
-                account: friend.account,
-                name: friend.name,
-                avatar: friend.avatar
+            const userListData = users.map(user => ({
+                _id: user._id,
+                account: user.account,
+                name: user.name,
+                avatar: user.avatar
             }));
 
             return {
                 status: 'success',
-                message: 'Get friend list successfully',
-                data: friendListData
+                message: 'Get user list successfully',
+                data: userListData
             }
         } catch (error) {
             return {

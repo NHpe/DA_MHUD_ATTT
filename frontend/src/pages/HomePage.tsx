@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import ChatList from "../components/ChatList";
 import { Types } from "mongoose";
+import ChatList from "../components/ChatList";
 import MessageList from "../components/MessageList";
 import MessageInput from "../components/MessageInput";
+import ChatOption from "./ChatOptionPage";
 
 interface Chat {
   _id: Types.ObjectId;
@@ -33,6 +34,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
@@ -46,6 +48,17 @@ const HomePage = () => {
   const handleMessageSent = (newMessage: Message) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
+
+  const handleOption = () => {
+    if (selectedChat) {
+      navigate('chat-option', {
+        state: {
+          chatId: selectedChat._id,
+          participantList: selectedChat.participantList
+        }
+      });
+    }
+  }
 
   return (
     <div className="flex h-screen">
@@ -70,6 +83,9 @@ const HomePage = () => {
         ) : (
           <><div className="flex-1 flex items-center justify-center text-gray-500">
               {selectedChat.name}
+              <button onClick={handleOption} className="mt-2 px-3 py-1 bg-blue-600 text-white rounded">
+                Cài đặt
+              </button>
             </div><>
             <div className="flex-1 overflow-y-auto">
               <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} messages={messages} setMessages={setMessages}/>
