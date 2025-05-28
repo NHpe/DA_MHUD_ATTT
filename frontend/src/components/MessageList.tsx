@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import axios from 'axios';
 import { Types } from 'mongoose';
 
 interface Message {
     _id: Types.ObjectId;
     chatId: Types.ObjectId;
-    sender: Types.ObjectId;
+    sender: {
+      _id: Types.ObjectId;
+      name: string;
+    }
     type: 'text' | 'file';
     content?: string;
     fileId?: Types.ObjectId;
@@ -17,12 +20,12 @@ interface Message {
 
 interface Props {
   chatId: Types.ObjectId;
-  chatKey: Buffer
+  chatKey: Buffer;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 }
 
-const MessageList = ({ chatId, chatKey }: Props) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-
+const MessageList = ({ chatId, chatKey, messages, setMessages }: Props) => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -38,13 +41,13 @@ const MessageList = ({ chatId, chatKey }: Props) => {
     if (chatId) {
       fetchMessages();
     }
-  }, [chatId, chatKey]);
+  }, [chatId, chatKey, setMessages]);
 
   return (
     <div className="h-full p-4 overflow-y-auto space-y-2">
       {messages.map((msg) => (
         <div key={msg._id.toString()} className="p-2 bg-gray-100 rounded shadow">
-          <div className="text-sm text-gray-600">{msg.sender.toString()}</div>
+          <div className="text-sm text-gray-600">{msg.sender.name}</div>
           <div className="text-base">{msg.content}</div>
           <div className="text-xs text-gray-400 text-right">{new Date(msg.time).toLocaleTimeString()}</div>
         </div>

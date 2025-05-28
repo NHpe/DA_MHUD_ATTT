@@ -13,16 +13,38 @@ interface Chat {
   type: 'single' | 'group';
 }
 
+interface Message {
+    _id: Types.ObjectId;
+    chatId: Types.ObjectId;
+    sender: {
+      _id: Types.ObjectId;
+      name: string;
+    }
+    type: 'text' | 'file';
+    content?: string;
+    fileId?: Types.ObjectId;
+    fileName? : string;
+    mimeType? : string;
+    iv: Buffer;
+    time: Date;
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
+    setMessages([]);
   };
 
   const handleStartNewChat = () => {
     navigate('/chat/new');
+  };
+
+  const handleMessageSent = (newMessage: Message) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
   };
 
   return (
@@ -50,10 +72,10 @@ const HomePage = () => {
               {selectedChat.name}
             </div><>
             <div className="flex-1 overflow-y-auto">
-              <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} />
+              <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} messages={messages} setMessages={setMessages}/>
             </div>
             <div className="border-t p-4">
-              <MessageInput chatId={selectedChat._id} chatKey={selectedChat.chatKey} />
+              <MessageInput chatId={selectedChat._id} chatKey={selectedChat.chatKey} onSent={handleMessageSent}/>
             </div>
           </></>
         )}

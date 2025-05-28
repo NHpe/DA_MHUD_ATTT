@@ -8,6 +8,7 @@ import fs from 'fs';
 class MessageService {
     async addNewMessage(chatId : Types.ObjectId, sender : Types.ObjectId, type : string, content : string, chatKey : Buffer, file) {
         try {
+            let message;
             const iv = Buffer.from(crypto.randomFillSync(new Uint8Array(16)));
             if (type === 'text') {
                 // Thự hiện mã hóa tin nhắn dạng text
@@ -26,6 +27,7 @@ class MessageService {
                 });
 
                 await newMessage.save();
+                message = await newMessage.populate('sender', 'name');
             }
             else if (file) {
                 const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, iv);
@@ -63,11 +65,13 @@ class MessageService {
                 });
 
                 await newMessage.save();
+                message = await newMessage.populate('sender', 'name');
             }
- 
+
             return {
                 status: 'success',
-                message: 'Message added successfully'
+                message: 'Message added successfully',
+                data: message
             }
         } catch (error) {
             return {

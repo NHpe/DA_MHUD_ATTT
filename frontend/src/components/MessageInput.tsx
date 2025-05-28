@@ -3,12 +3,29 @@ import axios from 'axios';
 import { useAuth } from '../provider/AuthProvider';
 import { Types } from 'mongoose';
 
+interface Message {
+    _id: Types.ObjectId;
+    chatId: Types.ObjectId;
+    sender: {
+      _id: Types.ObjectId;
+      name: string;
+    }
+    type: 'text' | 'file';
+    content?: string;
+    fileId?: Types.ObjectId;
+    fileName? : string;
+    mimeType? : string;
+    iv: Buffer;
+    time: Date;
+}
+
 interface Props {
   chatId: Types.ObjectId;
   chatKey: Buffer
+  onSent: (message: Message) => void;
 }
 
-const MessageInput = ({ chatId, chatKey }: Props) => {
+const MessageInput = ({ chatId, chatKey, onSent }: Props) => {
   const [message, setMessage] = useState('');
   const {user} = useAuth();
 
@@ -17,11 +34,20 @@ const MessageInput = ({ chatId, chatKey }: Props) => {
     if (!message.trim() || !user) return;
 
     try {
-      await axios.post(
+      const res = await axios.post(
         'http://localhost:3000/message/add-message',
         { chatId, sender: user._id, type: 'text', content: message, chatKey },
         { withCredentials: true }
       );
+
+      const newMessage = res.data.data;
+
+      const populatedMessage: Message = {
+        ...newMessage,
+        content: message, // override mã hóa bằng nội dung gốc vừa gửi
+      };
+
+      onSent(populatedMessage);
       setMessage('');
     } catch (err) {
       console.error('Lỗi khi gửi tin nhắn:', err);
