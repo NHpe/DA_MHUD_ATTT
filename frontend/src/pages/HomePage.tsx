@@ -9,6 +9,7 @@ import FriendList from "../components/FriendList";
 import PendingFriendList from "../components/PendingFriendList";
 import ChatOption from "../components/ChatOption";
 import FriendSearch from "../components/FriendSearch";
+import ProfileUser from "../components/ProfileUser";
 
 interface Chat {
   _id: Types.ObjectId;
@@ -90,7 +91,7 @@ const HomePage = () => {
                   <FriendList />
                 </>
               )}
-              {/* {activeSidebar === 'profile' && user && <ProfileCard user={user} />} */}
+              {activeSidebar === 'profile' && user && <ProfileUser />}
             </div>
           </div>
         )}

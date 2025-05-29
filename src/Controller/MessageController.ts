@@ -1,9 +1,12 @@
 import MessageService from "../Services/MessageService";
+import { Types } from "mongoose";
 
 class MessageController {
     async addNewMessage(req, res) {
         try {
-            const {chatId, sender, type, content, chatKey} = req.body;
+            let {chatId, sender, type, content, chatKey} = req.body;
+            chatId = new Types.ObjectId(chatId);
+            sender = new Types.ObjectId(sender);
 
             const chatKeyBuffer = Buffer.from(chatKey, 'base64');
 

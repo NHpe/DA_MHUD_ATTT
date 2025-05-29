@@ -26,50 +26,79 @@ interface Props {
 }
 
 const MessageInput = ({ chatId, chatKey, onSent }: Props) => {
-  const [message, setMessage] = useState('');
+  const [text, setText] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const {user} = useAuth();
 
   const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !user) return;
+    if (!user || (!text.trim() && !file)) return;
+
+    const base64Key = Buffer.from(chatKey).toString('base64');
 
     try {
-      const res = await axios.post(
-        'http://localhost:3000/message/add-message',
-        { chatId, sender: user._id, type: 'text', content: message, chatKey },
-        { withCredentials: true }
-      );
+      if (file) {
+        const formData = new FormData();
+        formData.append('chatId', chatId.toString());
+        formData.append('sender', user._id.toString());
+        formData.append('chatKey', base64Key);
+        formData.append('type', 'file');
+        formData.append('file', file);
 
-      const newMessage = res.data.data;
+        const res = await axios.post('http://localhost:3000/message/add-message', formData, {
+          withCredentials: true,
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
 
-      const populatedMessage: Message = {
-        ...newMessage,
-        content: message, // override mã hóa bằng nội dung gốc vừa gửi
-      };
+        const newMessage = res.data.data;
+        onSent({ ...newMessage });
+      }
 
-      onSent(populatedMessage);
-      setMessage('');
+      if (text.trim()) {
+        const formData = new FormData();
+        formData.append('chatId', chatId.toString());
+        formData.append('sender', user._id.toString());
+        formData.append('chatKey', base64Key);
+        formData.append('type', 'text');
+        formData.append('content', text);
+
+        const res = await axios.post('http://localhost:3000/message/add-message', formData, {
+          withCredentials: true,
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        const newMessage = res.data.data;
+        onSent({ ...newMessage, content: text });
+      }
+      setText('');
+      setFile(null);
     } catch (err) {
       console.error('Lỗi khi gửi tin nhắn:', err);
     }
   };
 
   return (
-    <form onSubmit={handleSend} className="flex gap-2">
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+    <div className="flex flex-col space-y-2">
+      <textarea
+        rows={2}
+        className="w-full border rounded p-2 text-sm"
         placeholder="Nhập tin nhắn..."
-        className="flex-1 p-2 border rounded"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
       />
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Gửi
-      </button>
-    </form>
+      <div className="flex items-center justify-between gap-2">
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files?.[0] || null)}
+          className="text-sm"
+        />
+        <button
+          onClick={handleSend}
+          className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+        >
+          Gửi
+        </button>
+      </div>
+    </div>
   );
 };
 

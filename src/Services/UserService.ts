@@ -170,10 +170,37 @@ class UserService {
         }
     }
 
+    async changeUserName(userId : Types.ObjectId, newName: string) {
+        try {
+            const user = await User.findById(userId, {
+                name: newName
+            });
+
+            if (user) {
+                return {
+                    stauts: 'success',
+                    message: 'Changed name successfully'
+                }
+            }
+
+            return {
+                status: 'warning',
+                message: 'Failed to change name'
+            }
+
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
     async uploadAvatar(userID : Types.ObjectId, file) {
         try {
+            console.log(file);
             const user = await User.findByIdAndUpdate(userID, {avatar: {
-                data: file.Buffer,
+                data: file.buffer,
                 mimetype: file.mimetype
             }});
 

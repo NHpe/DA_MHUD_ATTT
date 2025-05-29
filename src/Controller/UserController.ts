@@ -119,14 +119,16 @@ class UserController {
 
     async uploadAvatar(req, res) {
         try {
+            console.log(req.body);
+
             if (!req.file) {
                 return res.status(400).json({ message: 'No file uploaded' });
             }
 
-            const {userID} = req.body;
             const {file} = req.file;
+            const {userId} = req.user._id;
 
-            const result = await UserService.uploadAvatar(userID, file);
+            const result = await UserService.uploadAvatar(userId, file);
 
             if (result.status === 'success') {
                 res.status(200).json({message: result.message});
@@ -138,7 +140,32 @@ class UserController {
                 message: error.message
             });
         }
-        
+    }
+
+    async changeUserName(req, res) {
+        try {
+            const {newName} = req.body;
+            const {userId} = req.user._id;
+            const result = await UserService.changeUserName(userId, newName);
+
+            if (result.status === 'success') {
+                res.status(200).json({
+                    message: result.message,
+                });
+            } else if (result.status === 'error') {
+                res.status(500).json({
+                    message: result.message
+                });
+            } else {
+                res.status(400).json({
+                    message: result.message,
+                });
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            });
+        }
     }
 }
 

@@ -10,4 +10,6 @@ UserRouter.post('/upload-avatar', upload.single('avatar'), UserController.upload
 
 UserRouter.get('/search', UserController.searchUser);
 
+UserRouter.post('/change-user-name', UserController.changeUserName);
+
 export default UserRouter;

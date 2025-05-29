@@ -48,7 +48,11 @@ const MessageList = ({ chatId, chatKey, messages, setMessages }: Props) => {
       {messages.map((msg) => (
         <div key={msg._id.toString()} className="p-2 bg-gray-100 rounded shadow">
           <div className="text-sm text-gray-600">{msg.sender.name}</div>
-          <div className="text-base">{msg.content}</div>
+          {msg.type === 'text' ? (
+            <div className="text-base">{msg.content}</div>
+          ) : (
+            <div className="text-base">{msg.fileName}</div>
+          )}
           <div className="text-xs text-gray-400 text-right">{new Date(msg.time).toLocaleTimeString()}</div>
         </div>
       ))}
