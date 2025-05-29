@@ -6,7 +6,6 @@ import RegisterPage from "../pages/RegisterPage";
 import HomePage from "../pages/HomePage";
 import FriendsPage from "../pages/FriendPage";
 import NewChatPage from "../pages/NewChatPage";
-import ChatOption from "../pages/ChatOptionPage";
 
 const Routes = () => {
   const { user } = useAuth();
@@ -27,12 +26,6 @@ const Routes = () => {
         {
           path: "/new-chat",
           element: <NewChatPage />
-        },
-        {
-          path: "/chat-option",
-          element: (
-            <ChatOption />
-          )
         },
         {
           path: "/logout",

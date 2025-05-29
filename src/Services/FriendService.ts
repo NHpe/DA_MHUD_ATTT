@@ -4,6 +4,19 @@ import User from "../Models/UserModel";
 class FriendService {
     async sendFriendRequest(fromUser, toUser) {
         try {
+            // Kiểm tra điều kiện 
+            const existedRequest = await Friend.find({
+                fromUser,
+                toUser,
+                status: 'requested'
+            });
+            if (existedRequest) {
+                return {
+                    status: 'success',
+                    message: 'Request already sent'
+                }
+            }
+
             // Tạo lời mời kết bạn mới từ người gửi
             const newFriendRequestSender = new Friend({
                 fromUser,
@@ -39,7 +52,7 @@ class FriendService {
             await Friend.updateOne({
                 fromUser,
                 toUser,
-                status: 'requested'
+                status: 'pendin'
             }, {
                 status: 'accepted'
             });
@@ -47,7 +60,7 @@ class FriendService {
             await Friend.updateOne({
                 fromUser: toUser,
                 toUser: fromUser,
-                status: 'pending'
+                status: 'requested'
             }, {
                 status: 'accepted'
             });
@@ -156,8 +169,8 @@ class FriendService {
         try {
             const friendRequests = await Friend.find({
                 toUser: userId,
-                status: 'requested'
-            }).populate('fromUser', '_id account name avatar');
+                status: 'pending'
+            }).populate('fromUser', '_id name account avatar');
 
             return {
                 status: 'success',

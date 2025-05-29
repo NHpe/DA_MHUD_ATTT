@@ -37,7 +37,7 @@ const FriendSearch = () => {
         'http://localhost:3000/friend/send-request',
         {
           fromUser: user?._id,
-          toUser: new Types.ObjectId(friendId),
+          toUser: friendId,
         },
         { withCredentials: true }
       );

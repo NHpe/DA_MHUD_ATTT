@@ -15,8 +15,8 @@ interface IFriend {
 
 // Create Schema
 const friendSchema = new Schema<IFriend>({
-    fromUser: {type : Types.ObjectId},
-    toUser: {type: Types.ObjectId},
+    fromUser: {type : Types.ObjectId, ref: 'User'},
+    toUser: {type: Types.ObjectId, ref: 'User'},
     status: {
         type: String,
         enum: ['pending', 'requested', 'accepted'],

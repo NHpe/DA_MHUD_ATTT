@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Types } from 'mongoose';
 import { useAuth } from '../provider/AuthProvider';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 interface User {
   _id: Types.ObjectId;
@@ -14,15 +13,19 @@ interface User {
   };
 }
 
-const ChatOption = () => {
+interface Props {
+  chatId: Types.ObjectId;
+  participantList: Types.ObjectId[];
+  onClose: () => void
+}
+
+const ChatOption = ({chatId, participantList, onClose} : Props) => {
   const [members, setMembers] = useState<User[]>([]);
   const [newName, setNewName] = useState('');
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<Types.ObjectId>();
   const {user} = useAuth();
-  const navigate = useNavigate();
-  const {chatId, participantList} = useLocation().state;
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -77,10 +80,6 @@ const ChatOption = () => {
       console.error('Lỗi tìm kiếm người dùng:', err);
     }
   };
-
-  const onClose = () => {
-    navigate('/')
-  }
 
   return (
     <div className="p-4 bg-white rounded shadow max-w-md mx-auto space-y-4">
