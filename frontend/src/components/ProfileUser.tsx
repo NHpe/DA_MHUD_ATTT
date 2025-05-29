@@ -3,9 +3,12 @@ import { useState } from 'react';
 import axios from 'axios';
 
 const ProfileUser = () => {
-  const { user, setUser, refreshUser } = useAuth();
+  const {user, refreshUser} = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   if (!user) return null;
 
@@ -15,7 +18,7 @@ const ProfileUser = () => {
 
   const handleNameChange = async () => {
     try {
-      await axios.post('http://localhost:3000/user/update-name', { newName: name }, { withCredentials: true });
+      await axios.post('http://localhost:3000/user/change-user-name', { newName: name, userId: user._id }, { withCredentials: true });
       refreshUser();
     } catch (err) {
       console.error('Lỗi đổi tên:', err);
@@ -35,6 +38,28 @@ const ProfileUser = () => {
       refreshUser();
     } catch (err) {
       console.error('Lỗi upload avatar:', err);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword) return;
+    try {
+      const res = await axios.post('http://localhost:3000/user/change-password', {
+        userId: user._id,
+        oldPassword,
+        newPassword,
+      }, { withCredentials: true });
+
+      setOldPassword('');
+      setNewPassword('');
+      setShowPasswordFields(false);
+      if (res.status === 200)
+        alert('Đổi mật khẩu thành công');
+      else 
+        alert('Đổi mật khẩu thất bại');
+    } catch (err) {
+      console.error('Lỗi đổi mật khẩu:', err);
+      alert('Đổi mật khẩu thất bại');
     }
   };
 
@@ -89,6 +114,52 @@ const ProfileUser = () => {
       </div>
 
       <p><strong>Tài khoản:</strong> {user.account}</p>
+
+      <div className="space-y-2 pt-4">
+        {!showPasswordFields ? (
+          <button
+            onClick={() => setShowPasswordFields(true)}
+            className="px-3 py-1 bg-gray-500 text-white rounded text-sm"
+          >
+            Đổi mật khẩu
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <label className="block">
+              <span className="text-sm font-medium">Mật khẩu cũ</span>
+              <input
+                type="password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="w-full border p-1 rounded mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium">Mật khẩu mới</span>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full border p-1 rounded mt-1"
+              />
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={handleChangePassword}
+                className="px-3 py-1 bg-red-600 text-white rounded text-sm"
+              >
+                Xác nhận
+              </button>
+              <button
+                onClick={() => setShowPasswordFields(false)}
+                className="px-3 py-1 bg-gray-300 text-black rounded text-sm"
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

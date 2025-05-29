@@ -32,8 +32,8 @@ const userSchema = new Schema<IUser>({
         ref: 'Chat'
     }],
     avatar: {
-        data: Buffer,
-        mimetype: String
+        data: {type: Buffer},
+        mimetype: {type: String}
     }
 });
 

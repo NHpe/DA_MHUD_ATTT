@@ -172,22 +172,13 @@ class UserService {
 
     async changeUserName(userId : Types.ObjectId, newName: string) {
         try {
-            const user = await User.findById(userId, {
+            const user = await User.findByIdAndUpdate(userId, {
                 name: newName
             });
-
-            if (user) {
-                return {
-                    stauts: 'success',
-                    message: 'Changed name successfully'
-                }
-            }
-
             return {
-                status: 'warning',
-                message: 'Failed to change name'
+                stauts: 'success',
+                message: 'Changed name successfully'
             }
-
         } catch (error) {
             return {
                 status: 'error',
@@ -196,15 +187,16 @@ class UserService {
         }
     }
 
-    async uploadAvatar(userID : Types.ObjectId, file) {
+    async uploadAvatar(userId : Types.ObjectId, file) {
         try {
-            console.log(file);
-            const user = await User.findByIdAndUpdate(userID, {avatar: {
-                data: file.buffer,
-                mimetype: file.mimetype
-            }});
-
-            await user.save();
+            const user = await User.findByIdAndUpdate(userId, 
+                {
+                    $set: {
+                    'avatar.data': file.buffer,
+                    'avatar.mimetype': file.mimetype
+                    }
+                },
+            );
 
             return {
                 status: 'success',

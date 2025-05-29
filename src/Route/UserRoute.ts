@@ -12,4 +12,6 @@ UserRouter.get('/search', UserController.searchUser);
 
 UserRouter.post('/change-user-name', UserController.changeUserName);
 
+UserRouter.post('/change-password', UserController.changePassword);
+
 export default UserRouter;

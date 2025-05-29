@@ -119,14 +119,16 @@ class UserController {
 
     async uploadAvatar(req, res) {
         try {
-            console.log(req.body);
-
             if (!req.file) {
                 return res.status(400).json({ message: 'No file uploaded' });
             }
-
-            const {file} = req.file;
-            const {userId} = req.user._id;
+    
+            const file = {
+                buffer: req.file.buffer,
+                originalname: req.file.originalname,
+                mimetype: req.file.mimetype
+            }
+            const {userId} = req.body;
 
             const result = await UserService.uploadAvatar(userId, file);
 
@@ -142,10 +144,28 @@ class UserController {
         }
     }
 
+    async changePassword(req, res) {
+        try {
+            const {userId, oldPassword, newPassword} = req.body;
+
+            const result = await UserService.changePassword(userId, oldPassword, newPassword);
+            if (result.status === 'success') {
+                res.status(200).json({message: result.message});
+            } else if (result.status === 'error') {
+                res.status(500).json({message: result.message});
+            } else {
+                res.status(400).json({message: result.message});
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            });
+        }
+    }
+
     async changeUserName(req, res) {
         try {
-            const {newName} = req.body;
-            const {userId} = req.user._id;
+            const {newName, userId} = req.body;
             const result = await UserService.changeUserName(userId, newName);
 
             if (result.status === 'success') {
@@ -155,10 +175,6 @@ class UserController {
             } else if (result.status === 'error') {
                 res.status(500).json({
                     message: result.message
-                });
-            } else {
-                res.status(400).json({
-                    message: result.message,
                 });
             }
         } catch (error) {
