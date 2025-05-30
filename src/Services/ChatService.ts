@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { Chat } from "../Models/ChatModel";
 import User from "../Models/UserModel";
+import { encrypt } from "../Ultis/cryption";
 
 import crypto from 'node:crypto'
 
@@ -16,11 +17,14 @@ class ChatService {
             else {
                 chatKey = Buffer.from(crypto.randomFillSync(new Uint8Array(32))); // AES-256
             }
+
+            const encryptChatKey = encrypt(chatKey);
+
             const chat = new Chat({
                 name,
                 type: isSingle ? 'single' : 'group',
                 participantList,
-                chatKey
+                chatKey : encryptChatKey
             });
 
             await chat.save();

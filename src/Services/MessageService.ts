@@ -1,18 +1,21 @@
 import { Types, connection, mongo } from "mongoose";
-import { GridFSBucket, ObjectId } from "mongodb";
 import { Message } from "../Models/MessageModel";
+import { decrypt } from "../Ultis/cryption";
+import { getGridFsBucketFile } from "../Ultis/gridfs";
 
-import crypto, { randomBytes, randomFill } from 'node:crypto';
-import fs from 'fs';
+import crypto from 'node:crypto';
 
 class MessageService {
     async addNewMessage(chatId : Types.ObjectId, sender : Types.ObjectId, type : string, content : string, chatKey : Buffer, file) {
         try {
             let message;
+
+            const decryptChatKey = decrypt(chatKey);
+
             const iv = Buffer.from(crypto.randomFillSync(new Uint8Array(16)));
             if (type === 'text') {
                 // Thự hiện mã hóa tin nhắn dạng text
-                const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, iv);
+                const cipher = crypto.createCipheriv('aes-256-cbc', decryptChatKey, iv);
 
                 let encrypted = cipher.update(content, 'utf-8', 'base64');
                 encrypted += cipher.final('base64');
@@ -30,15 +33,13 @@ class MessageService {
                 message = await newMessage.populate('sender', 'name');
             }
             else if (file) {
-                const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, iv);
+                const cipher = crypto.createCipheriv('aes-256-cbc', decryptChatKey, iv);
                 const encryptedBuffer = Buffer.concat([
                     cipher.update(file.buffer),
                     cipher.final()
                 ]);
 
-                const bucket = new mongo.GridFSBucket(connection.db, {
-                    bucketName: 'files'
-                });
+                const bucket = getGridFsBucketFile();
 
                 const uploadStream = bucket.openUploadStream(file.originalname, {
                     contentType: file.mimetype,
@@ -81,24 +82,29 @@ class MessageService {
         }
     }
 
-    async removeMessage(messageId: Types.ObjectId) {
+    async removeMessage(messageId: Types.ObjectId, type: string) {
         try {
-            const result = await Message.findByIdAndDelete(messageId, {
-                $pull: { _id: messageId}
-            });
+            if (type === 'text') {
+                const result = await Message.findByIdAndDelete(messageId, {
+                    $pull: { _id: messageId}
+                });
+            } else {
+                const fileDoc = await Message.findById(messageId);
 
-            if (result) {
-                return {
-                    status: 'success',
-                    message: 'Message removed successfully'
+                const bucket = getGridFsBucketFile();
+                if (fileDoc && fileDoc.fileId) {
+                    await bucket.delete(fileDoc.fileId);
                 }
+
+                await Message.findByIdAndDelete(messageId, {
+                    $pull: { _id: messageId}
+                });
             }
 
             return {
-                status: 'warning',
-                message: 'Failed to remove message or message not found'
+                status: 'success',
+                message: 'Message removed successfully'
             }
-
         } catch (error) {
             return {
                 status: 'error',
@@ -113,13 +119,15 @@ class MessageService {
 
             let messageList = []
 
+            const decryptChatKey = decrypt(chatKey);
+
             for (const message of data) {
                 if (message.type === 'text') {
                     const iv = message.iv; // Kiểu Buffer
                     const encryptedContent = message.content;
 
                     try {
-                        const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, iv);
+                        const decipher = crypto.createDecipheriv('aes-256-cbc', decryptChatKey, iv);
                         let decrypted = decipher.update(encryptedContent, 'base64', 'utf-8');
                         decrypted += decipher.final('utf-8');
 
@@ -142,17 +150,10 @@ class MessageService {
                 }
             }
 
-            if (messageList.length > 0) {
-                return {
-                    status: 'success',
-                    message: 'Message list retrieved successfully',
-                    data: messageList
-                }
-            }
-
             return {
-                status: 'warning',
-                message: 'Chat not found or message list is empty'
+                status: 'success',
+                message: 'Message list retrieved successfully',
+                data: messageList
             }
         } catch (error) {
             return {
@@ -164,9 +165,9 @@ class MessageService {
 
     async decryptedFileMessage(fileId : Types.ObjectId, chatKey: Buffer, fileIv : Buffer) {
         try {
-            const bucket = new mongo.GridFSBucket(connection.db, {
-                bucketName: 'files'
-            });
+            const decryptChatKey = decrypt(chatKey);
+
+            const bucket = getGridFsBucketFile();
 
             const downloadStream = bucket.openDownloadStream(new Types.ObjectId(fileId));
 
@@ -178,7 +179,7 @@ class MessageService {
                     const encryptedBuffer = Buffer.concat(chunks);
                     
                     // Giải mã
-                    const decipher = crypto.createDecipheriv('aes-256-cbc', chatKey, fileIv);
+                    const decipher = crypto.createDecipheriv('aes-256-cbc', decryptChatKey, fileIv);
                     const decryptedBuffer = Buffer.concat([
                         decipher.update(encryptedBuffer),
                         decipher.final()
@@ -199,9 +200,10 @@ class MessageService {
 
     async editMessage(messageId: Types.ObjectId, newContent: string, chatKey: Buffer) {
         try {
+            const decryptChatKey = decrypt(chatKey);
             const message = await Message.findById(messageId);
 
-            const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, message.iv);
+            const cipher = crypto.createCipheriv('aes-256-cbc', decryptChatKey, message.iv);
             let encrypted = cipher.update(newContent, 'utf-8', 'base64');
             encrypted += cipher.final('base64');
 

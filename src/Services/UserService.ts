@@ -189,19 +189,25 @@ class UserService {
 
     async uploadAvatar(userId : Types.ObjectId, file) {
         try {
-            const user = await User.findByIdAndUpdate(userId, 
-                {
-                    $set: {
-                    'avatar.data': file.buffer,
-                    'avatar.mimetype': file.mimetype
-                    }
-                },
-            );
+            const user = await User.findById(userId);
+            if (user) {
+                user.avatar = {
+                    data: file.buffer,
+                    mimetype: file.mimetype
+                };
+                await user.save();
+
+                return {
+                    status: 'success',
+                    message: 'Upload avatar successfully'
+                }
+            }
 
             return {
-                status: 'success',
-                message: 'Upload avatar successfully'
+                status: 'warning',
+                message: 'Failed to upload avatar'
             }
+            
         } catch (error) {
             return {
                 status: 'error',

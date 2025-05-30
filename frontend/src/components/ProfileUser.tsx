@@ -29,6 +29,7 @@ const ProfileUser = () => {
     if (!avatarFile) return;
     const formData = new FormData();
     formData.append('avatar', avatarFile);
+    formData.append('userId', user._id.toString());
 
     try {
       await axios.post('http://localhost:3000/user/upload-avatar', formData, {

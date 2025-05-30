@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../provider/AuthProvider";
 import { Types } from "mongoose";
@@ -10,6 +9,7 @@ import PendingFriendList from "../components/PendingFriendList";
 import ChatOption from "../components/ChatOption";
 import FriendSearch from "../components/FriendSearch";
 import ProfileUser from "../components/ProfileUser";
+import NewChat from "../components/NewChat";
 
 interface Chat {
   _id: Types.ObjectId;
@@ -36,7 +36,6 @@ interface Message {
 }
 
 const HomePage = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,16 +43,13 @@ const HomePage = () => {
   const [showOptionSidebar, setShowOptionSidebar] = useState(false);
   const [showMainMenu, setShowMainMenu] = useState(false);
   const [activeSidebar, setActiveSidebar] = useState<'chat' | 'friends' | 'profile'>('chat');
+  const [showModal, setShowModal] = useState(false);
 
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
     setMessages([]);
     setShowOptionSidebar(false);
-  };
-
-  const handleStartNewChat = () => {
-    navigate('/new-chat');
   };
 
   const handleMessageSent = (newMessage: Message) => {
@@ -81,7 +77,24 @@ const HomePage = () => {
         <div className="flex justify-between items-center mb-4">
           <button onClick={toggleMainMenu} className="text-sm px-2 py-1 bg-gray-200 rounded">☰</button>
           <h2 className="text-lg font-bold">Trò chuyện</h2>
-          <button onClick={handleStartNewChat} className="text-sm px-2 py-1 bg-green-500 text-white rounded">+ Tạo</button>
+          <div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              + Cuộc trò chuyện mới
+            </button>
+
+            {showModal && (
+              <NewChat
+                onClose={() => setShowModal(false)}
+                onCreated={() => {
+                  // Có thể gọi API load lại danh sách chat ở đây
+                  console.log('Đã tạo nhóm');
+                }}
+              />
+            )}
+          </div>
         </div>
 
         {showMainMenu && (

@@ -1,5 +1,7 @@
 import UserService from "../Services/UserService"; 
 import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
+import { use } from "passport";
 
 class UserController {
     async registerUser(req, res) {
@@ -35,7 +37,7 @@ class UserController {
             if (result.status === 'success') {
                 const token = jwt.sign(
                     { id: result.data },
-                    'default',
+                    process.env.JWT_SECRET,
                     { expiresIn: '1d' }
                 );
 
@@ -122,13 +124,14 @@ class UserController {
             if (!req.file) {
                 return res.status(400).json({ message: 'No file uploaded' });
             }
-    
             const file = {
                 buffer: req.file.buffer,
                 originalname: req.file.originalname,
                 mimetype: req.file.mimetype
             }
-            const {userId} = req.body;
+
+            let {userId} = req.body;
+            userId = new Types.ObjectId(userId);
 
             const result = await UserService.uploadAvatar(userId, file);
 

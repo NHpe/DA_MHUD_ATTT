@@ -34,8 +34,8 @@ class MessageController {
 
     async removeMessage(req, res) {
         try {
-            const {messageId} = req.body
-            const result = await MessageService.removeMessage(messageId);
+            const {messageId, type} = req.body
+            const result = await MessageService.removeMessage(messageId, type);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});

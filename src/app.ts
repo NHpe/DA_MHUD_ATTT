@@ -1,15 +1,17 @@
-import express from 'express';
+import dotenv from 'dotenv';
 import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../src/.env') });
+
+import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import dotenv from 'dotenv';
 import passport from 'passport';
 
 import route from './Route/index';
 
-dotenv.config({ path: path.resolve(__dirname, '../src/.env') });
+
 
 const uri = process.env.DATABASE_URI;
 const clientOptions = { serverApi: { version: "1" as const, strict: false, deprecationErrors: true } };
