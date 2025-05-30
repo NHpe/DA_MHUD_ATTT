@@ -34,6 +34,11 @@ function route(app) {
         });
     });
 
+    app.post('/auth/logout', (req, res) => {
+        res.clearCookie('jwt');
+        res.status(200).json({ message: 'Success logout' });
+    });
+
     app.get('/', (req, res) => {
         res.send('Hello World!');
     });

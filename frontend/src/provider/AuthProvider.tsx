@@ -23,13 +23,15 @@ interface User {
 interface AuthContextType {
     user: User | null; // Dữ liệu người dùng
     setUser: (user: User | null) => void; // Hàm cập nhật người dùng
-    refreshUser: () => void
+    refreshUser: () => void,
+    logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   setUser: () => {}, // placeholder function
-  refreshUser: () => {}
+  refreshUser: () => {},
+  logout: () => {}
 });
 
 const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
@@ -54,6 +56,15 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
     fetchUser();
   }, []);
 
+  const logout = async () => {
+    try {
+      await axios.post('http://localhost:3000/auth/logout', {}, { withCredentials: true });
+      setUser(null); 
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
+  };
+
   const contextValue = useMemo(
     () => ({
       user,
@@ -61,7 +72,7 @@ const AuthProvider = ({ children }: PropsWithChildren<{}>) => {
       loading,
       isAuthenticated: !!user,
       refreshUser: fetchUser,
-      //logout,
+      logout,
     }),
     [user, loading]
   );

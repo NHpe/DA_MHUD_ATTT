@@ -1,13 +1,10 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import { useAuth } from "../provider/AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import HomePage from "../pages/HomePage";
 
 const Routes = () => {
-  const { user } = useAuth();
-
   // Define routes accessible only to authenticated users
   const routesForAuthenticatedOnly = [
     {
@@ -16,11 +13,7 @@ const Routes = () => {
         {
           path: "/",
           element: <HomePage />,
-        },
-        {
-          path: "/logout",
-          element: <div>Logout</div>,
-        },
+        }
       ],
     },
   ];
@@ -39,7 +32,7 @@ const Routes = () => {
 
   // Combine and conditionally include routes based on authentication status
   const router = createBrowserRouter([
-    ...(!user ? routesForNotAuthenticatedOnly : []),
+    ...routesForNotAuthenticatedOnly,
     ...routesForAuthenticatedOnly,
   ]);
 

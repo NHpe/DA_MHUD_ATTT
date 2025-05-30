@@ -30,6 +30,10 @@ const LoginPage = () => {
     }
   };
 
+  const handleRegister = async () => {
+    navigate('/register');
+  }
+
   return (
     <div className="max-w-md mx-auto mt-10 p-4 shadow-md border rounded">
       <h2 className="text-2xl font-bold mb-4">Đăng nhập</h2>
@@ -52,6 +56,9 @@ const LoginPage = () => {
         />
         <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
           Đăng nhập
+        </button>
+        <button onClick={handleRegister} className="bg-blue-500 text-white py-2 px-4 rounded">
+          Đăng ký
         </button>
       </form>
     </div>

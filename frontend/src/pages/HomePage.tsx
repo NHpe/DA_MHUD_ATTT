@@ -10,6 +10,7 @@ import ChatOption from "../components/ChatOption";
 import FriendSearch from "../components/FriendSearch";
 import ProfileUser from "../components/ProfileUser";
 import NewChat from "../components/NewChat";
+import { useNavigate } from "react-router-dom";
 
 interface Chat {
   _id: Types.ObjectId;
@@ -36,7 +37,7 @@ interface Message {
 }
 
 const HomePage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
@@ -44,7 +45,7 @@ const HomePage = () => {
   const [showMainMenu, setShowMainMenu] = useState(false);
   const [activeSidebar, setActiveSidebar] = useState<'chat' | 'friends' | 'profile'>('chat');
   const [showModal, setShowModal] = useState(false);
-
+  const navigate = useNavigate();
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
@@ -53,20 +54,25 @@ const HomePage = () => {
   };
 
   const handleMessageSent = (newMessage: Message) => {
-  setMessages((prevMessages) => {
-    const index = prevMessages.findIndex(msg => msg._id.toString() === newMessage._id.toString());
+    setMessages((prevMessages) => {
+      const index = prevMessages.findIndex(msg => msg._id.toString() === newMessage._id.toString());
 
-    if (index !== -1) {
-      // Nếu đã tồn tại -> chỉnh sửa
-      const updated = [...prevMessages];
-      updated[index] = newMessage;
-      return updated;
-    } else {
-      // Nếu chưa tồn tại -> tin nhắn mới
-      return [...prevMessages, newMessage];
-    }
-  });
-};
+      if (index !== -1) {
+        // Nếu đã tồn tại -> chỉnh sửa
+        const updated = [...prevMessages];
+        updated[index] = newMessage;
+        return updated;
+      } else {
+        // Nếu chưa tồn tại -> tin nhắn mới
+        return [...prevMessages, newMessage];
+      }
+    });
+  };
+
+  const handleLogOut = async () => {
+    await logout();
+    navigate('/login'); // Chuyển về trang đăng nhập
+  }
 
   const toggleMainMenu = () => setShowMainMenu((prev) => ! prev);
 
@@ -101,6 +107,7 @@ const HomePage = () => {
           <div className="mb-4 space-y-2">
             <button onClick={() => setActiveSidebar('friends')} className="block w-full text-left hover:underline">Bạn bè</button>
             <button onClick={() => setActiveSidebar('profile')} className="block w-full text-left hover:underline">Thông tin cá nhân</button>
+            <button onClick={() => handleLogOut()} className="block w-full text-left hover:underline">Đăng xuất</button>
           </div>
         )}
 
