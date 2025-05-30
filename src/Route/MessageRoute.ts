@@ -12,4 +12,6 @@ MessageRoute.post('/get-message-chat', MessageController.getMessageListOfChat);
 
 MessageRoute.post('/download-file', MessageController.decryptFileAndDownload);
 
+MessageRoute.post('/edit-message', MessageController.editMessage);
+
 export default MessageRoute;

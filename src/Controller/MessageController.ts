@@ -91,6 +91,27 @@ class MessageController {
             return res.status(500).json({message: error.message});
         }
     }
+
+    async editMessage(req, res) {
+        try {
+            const {messageId, newContent, chatKey} = req.body;
+
+            const chatKeyBuffer = Buffer.from(chatKey, 'base64');
+            const result = await MessageService.editMessage(messageId, newContent, chatKeyBuffer);
+            
+            if (result.status === 'success') {
+                return res.status(200).json({
+                    message: result.message,
+                    data: result.data
+                });
+            }
+            else {
+                return res.status(500).json({message: result.message});
+            }
+        } catch (error) {
+            return res.status(500).json({message: error.message});
+        }
+    }
 }
 
 export default new MessageController();

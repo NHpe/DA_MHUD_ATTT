@@ -87,8 +87,6 @@ class MessageService {
                 $pull: { _id: messageId}
             });
 
-            await result.save();
-
             if (result) {
                 return {
                     status: 'success',
@@ -191,6 +189,30 @@ class MessageService {
 
                 downloadStream.on('error', reject);
             });
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async editMessage(messageId: Types.ObjectId, newContent: string, chatKey: Buffer) {
+        try {
+            const message = await Message.findById(messageId);
+
+            const cipher = crypto.createCipheriv('aes-256-cbc', chatKey, message.iv);
+            let encrypted = cipher.update(newContent, 'utf-8', 'base64');
+            encrypted += cipher.final('base64');
+
+            message.content = encrypted;
+            await message.save();
+
+            return {
+                status: 'success',
+                message: 'Edit message successfully',
+                data: message
+            }
         } catch (error) {
             return {
                 status: 'error',

@@ -40,9 +40,11 @@ const HomePage = () => {
   const { user } = useAuth();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [showOptionSidebar, setShowOptionSidebar] = useState(false);
   const [showMainMenu, setShowMainMenu] = useState(false);
   const [activeSidebar, setActiveSidebar] = useState<'chat' | 'friends' | 'profile'>('chat');
+
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
@@ -55,8 +57,20 @@ const HomePage = () => {
   };
 
   const handleMessageSent = (newMessage: Message) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  };
+  setMessages((prevMessages) => {
+    const index = prevMessages.findIndex(msg => msg._id.toString() === newMessage._id.toString());
+
+    if (index !== -1) {
+      // Nếu đã tồn tại -> chỉnh sửa
+      const updated = [...prevMessages];
+      updated[index] = newMessage;
+      return updated;
+    } else {
+      // Nếu chưa tồn tại -> tin nhắn mới
+      return [...prevMessages, newMessage];
+    }
+  });
+};
 
   const toggleMainMenu = () => setShowMainMenu((prev) => ! prev);
 
@@ -112,10 +126,10 @@ const HomePage = () => {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} messages={messages} setMessages={setMessages} />
+              <MessageList chatId={selectedChat._id} chatKey={selectedChat.chatKey} messages={messages} setMessages={setMessages} setEditingMessage={setEditingMessage} />
             </div>
             <div className="border-t p-4">
-              <MessageInput chatId={selectedChat._id} chatKey={selectedChat.chatKey} onSent={handleMessageSent} />
+              <MessageInput chatId={selectedChat._id} chatKey={selectedChat.chatKey} onSent={handleMessageSent} editingMessage={editingMessage} setEditingMessage={setEditingMessage}/>
             </div>
           </>
         )}
