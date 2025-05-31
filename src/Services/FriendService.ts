@@ -10,7 +10,7 @@ class FriendService {
                 toUser,
                 status: 'requested'
             });
-            if (existedRequest) {
+            if (existedRequest.length > 0) {
                 return {
                     status: 'success',
                     message: 'Request already sent'
@@ -33,11 +33,17 @@ class FriendService {
             })
             await newFriendRequestReceiver.save();
 
-            return {
-                status: 'success',
-                message: 'Send friend request successfully'
+            if (newFriendRequestReceiver && newFriendRequestSender) {
+                return {
+                    status: 'success',
+                    message: 'Send friend request successfully'
+                }
             }
 
+            return {
+                status: 'warning',
+                message: 'Failed to send friend request'
+            }
         } catch (error) {
             return {
                 status: 'error',
@@ -49,19 +55,11 @@ class FriendService {
     async acceptFriendRequest(fromUser, toUser) {
         try {
             // Cập nhật trạng thái lời mời kết bạn 
-            await Friend.updateOne({
-                fromUser,
-                toUser,
-                status: 'pendin'
-            }, {
+            await Friend.findOneAndUpdate({fromUser, toUser}, {
                 status: 'accepted'
             });
             
-            await Friend.updateOne({
-                fromUser: toUser,
-                toUser: fromUser,
-                status: 'requested'
-            }, {
+            await Friend.findOneAndUpdate({fromUser: toUser, toUser: fromUser}, {
                 status: 'accepted'
             });
 
@@ -169,7 +167,7 @@ class FriendService {
         try {
             const friendRequests = await Friend.find({
                 toUser: userId,
-                status: 'pending'
+                status: 'requested'
             }).populate('fromUser', '_id name account avatar');
 
             return {

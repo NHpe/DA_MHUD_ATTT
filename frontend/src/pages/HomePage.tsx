@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../provider/AuthProvider";
 import { Types } from "mongoose";
 import ChatList from "../components/ChatList";
@@ -11,6 +11,7 @@ import FriendSearch from "../components/FriendSearch";
 import ProfileUser from "../components/ProfileUser";
 import NewChat from "../components/NewChat";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 interface Chat {
   _id: Types.ObjectId;
@@ -36,20 +37,56 @@ interface Message {
     time: Date;
 }
 
+interface Friend {
+  _id: Types.ObjectId;
+  account: string;
+  name: string;
+  avatar?: {
+    data: Buffer;
+    mimetype: string;
+  };
+}
+
 const HomePage = () => {
   const { user, logout } = useAuth();
+  const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [friendList, setFriendList] = useState<Friend[]>([]);
   const [showOptionSidebar, setShowOptionSidebar] = useState(false);
   const [showMainMenu, setShowMainMenu] = useState(false);
-  const [activeSidebar, setActiveSidebar] = useState<'chat' | 'friends' | 'profile'>('chat');
-  const [showModal, setShowModal] = useState(false);
+  const [activeSidebar, setActiveSidebar] = useState<'chat' | 'friends' | 'profile' | 'create-chat'>('chat');
   const navigate = useNavigate();
+
+  const refreshChatList = async () => {
+    try {
+      const res = await axios.post('http://localhost:3000/chat/get-chat-list', 
+        {chatList: user?.chatList}, 
+        {withCredentials: true},);
+      setChats(res.data.chats);
+      setSelectedChat(selectedChat);
+    } catch (err) {
+      console.error('Không thể load danh sách chat:', err);
+    }
+  };
+
+  useEffect(() => {
+    const refreshChatList = async () => {
+      try {
+        const res = await axios.post('http://localhost:3000/chat/get-chat-list', 
+          {chatList: user?.chatList}, 
+          {withCredentials: true},);
+        setChats(res.data.chats);
+      } catch (err) {
+        console.error('Không thể load danh sách chat:', err);
+      }
+    };
+    refreshChatList();
+  }, [user?.chatList]);
 
   const handleChatClick = (chat : Chat) => {
     setSelectedChat(chat);
-    setMessages([]);
     setShowOptionSidebar(false);
   };
 
@@ -76,6 +113,19 @@ const HomePage = () => {
 
   const toggleMainMenu = () => setShowMainMenu((prev) => ! prev);
 
+  const loadChat = async (chatId: Types.ObjectId) => {
+    try {
+      const res = await axios.post(`http://localhost:3000/chat/get-chat-infor`, {
+        chatId
+      },{
+        withCredentials: true,
+      });
+      setSelectedChat(res.data.data);
+    } catch (err) {
+      console.error('Lỗi khi tải lại thông tin chat:', err);
+    }
+  };
+
   return (
     <div className="flex h-screen">
       {/* Sidebar trái: Danh sách trò chuyện hoặc menu phụ */}
@@ -83,35 +133,18 @@ const HomePage = () => {
         <div className="flex justify-between items-center mb-4">
           <button onClick={toggleMainMenu} className="text-sm px-2 py-1 bg-gray-200 rounded">☰</button>
           <h2 className="text-lg font-bold">Trò chuyện</h2>
-          <div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded"
-            >
-              + Cuộc trò chuyện mới
-            </button>
-
-            {showModal && (
-              <NewChat
-                onClose={() => setShowModal(false)}
-                onCreated={() => {
-                  // Có thể gọi API load lại danh sách chat ở đây
-                  console.log('Đã tạo nhóm');
-                }}
-              />
-            )}
-          </div>
         </div>
 
         {showMainMenu && (
           <div className="mb-4 space-y-2">
-            <button onClick={() => setActiveSidebar('friends')} className="block w-full text-left hover:underline">Bạn bè</button>
             <button onClick={() => setActiveSidebar('profile')} className="block w-full text-left hover:underline">Thông tin cá nhân</button>
+            <button onClick={() => setActiveSidebar('friends')} className="block w-full text-left hover:underline">Bạn bè</button>
+            <button onClick={() => setActiveSidebar('create-chat')} className="block w-full text-left hover:underline">Tạo cuộc trò chuyện mới</button>
             <button onClick={() => handleLogOut()} className="block w-full text-left hover:underline">Đăng xuất</button>
           </div>
         )}
 
-        {activeSidebar === 'chat' && <ChatList onSelectChat={handleChatClick} />}
+        {activeSidebar === 'chat' && <ChatList onSelectChat={handleChatClick} chats={chats}/>}
         {activeSidebar !== 'chat' && (
           <div>
             <button onClick={() => setActiveSidebar('chat')} className="mb-4 text-sm text-blue-500 hover:underline">← Quay lại danh sách trò chuyện</button>
@@ -120,12 +153,13 @@ const HomePage = () => {
                 <>
                   <FriendSearch />
                   <h3 className="font-semibold">Danh sách lời mời kết bạn hiện có</h3>
-                  <PendingFriendList />
+                  <PendingFriendList onFriendAccepted={(newFriend) => setFriendList((prev) => [...prev, newFriend])} />
                   <h3 className="font-semibold">Danh sách bạn bè hiện tại</h3>
-                  <FriendList />
+                  <FriendList friends={friendList} setFriends={setFriendList}/>
                 </>
               )}
               {activeSidebar === 'profile' && user && <ProfileUser />}
+              {activeSidebar === 'create-chat' && <NewChat/>}
             </div>
           </div>
         )}
@@ -159,7 +193,7 @@ const HomePage = () => {
       {showOptionSidebar && selectedChat && (
         <aside className="w-1/4 border-l p-4 overflow-y-auto">
           <button onClick={() => setShowOptionSidebar(false)} className="mb-4 text-sm text-blue-500 hover:underline">← Quay lại đoạn chat</button>
-          <ChatOption chatId={selectedChat._id} participantList={selectedChat.participantList} onClose={() => setShowOptionSidebar(false)} />
+          <ChatOption chatId={selectedChat._id} participantList={selectedChat.participantList} refreshChat={() => loadChat(selectedChat._id)} refreshChatList={refreshChatList}/>
         </aside>
       )}
     </div>

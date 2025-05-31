@@ -18,6 +18,10 @@ const RegisterPage = () => {
     }
   };
 
+  const handleLogin = () => {
+    navigate('/login');
+  }
+
   return (
     <div className="max-w-md mx-auto mt-10 p-4 shadow-md border rounded">
       <h2 className="text-2xl font-bold mb-4">Đăng ký</h2>
@@ -40,6 +44,9 @@ const RegisterPage = () => {
         />
         <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded">
           Đăng ký
+        </button>
+        <button onClick={handleLogin} className="bg-green-500 text-white py-2 px-4 rounded">
+          Quay về trang đăng nhập
         </button>
       </form>
     </div>

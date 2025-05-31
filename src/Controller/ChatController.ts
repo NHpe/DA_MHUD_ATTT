@@ -24,9 +24,10 @@ class ChatController {
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});
-            }
-            else {
+            } else if (result.status === 'error') {
                 return res.status(500).json({message: result.message});
+            } else {
+                return res.status(400).json({message: result.message});
             }
         } catch (error) {
             return res.status(500).json({message: error.message});
@@ -74,6 +75,24 @@ class ChatController {
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});
+            } else if (result.status === 'error') {
+                return res.status(500).json({message: result.message});
+            } else {
+                return res.status(400).json({message: result.message});
+            }
+        } catch (error) {
+            return res.status(500).json({message: error.message});
+            
+        }
+    }
+
+    async getChatInfor(req, res) {
+        try {
+            const {chatId} = req.body;
+            const result = await ChatService.getChatInfor(chatId);
+
+            if (result.status === 'success') {
+                return res.status(200).json({message: result.message, data: result.data});
             } else if (result.status === 'error') {
                 return res.status(500).json({message: result.message});
             } else {

@@ -53,21 +53,29 @@ class ChatService {
 
     async addParticipant(chatId: Types.ObjectId, participant: Types.ObjectId) {
         try {
-            await Chat.updateOne({
-                _id: chatId
-            }, {
+            const updateChat = await Chat.findByIdAndUpdate(chatId, {
                 $push: {
                     participantList: participant
                 }
             });
+            if (!updateChat) {
+                return {
+                    status: 'warning',
+                    message: 'Failed to update chat'
+                }
+            }
 
-            await User.updateOne({
-                _id: participant
-            }, {
+            const updateUser = await User.findByIdAndUpdate(participant, {
                 $push: {
                     chatList: chatId
                 }
             });
+            if (!updateUser) {
+                return {
+                    status: 'warning',
+                    message: 'Failed to update user'
+                }
+            }
 
             return {
                 status: 'success',
@@ -143,6 +151,30 @@ class ChatService {
                 return {
                     status: 'success',
                     message: 'Changed name successfully'
+                }
+            }
+            return {
+                status: 'error',
+                message: 'Failed to change name'
+            }
+        } catch (error) {
+            return {
+                status: 'error',
+                message: error.message
+            }
+        }
+    }
+
+    async getChatInfor(chatId : Types.ObjectId) {
+        try {
+            const chat = await Chat.findById(chatId);
+
+
+            if (chat) {
+                return {
+                    status: 'success',
+                    message: 'Changed name successfully',
+                    data: chat
                 }
             }
             return {

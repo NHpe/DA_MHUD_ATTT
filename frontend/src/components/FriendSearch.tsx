@@ -13,6 +13,13 @@ interface SearchResult {
   };
 }
 
+const getAvatarUrl = (avatar?: { data: any; mimetype: string }) => {
+  const avatarUrl = avatar?.data
+    ? `data:${avatar.mimetype};base64,${Buffer.from(avatar.data).toString('base64')}`
+    : null;
+  return avatarUrl;
+};
+
 const FriendSearch = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -64,11 +71,19 @@ const FriendSearch = () => {
       
       {results.map((friend) => {
       const isFriend = friendIds.includes(friend._id.toString());
+      const avatarUrl = getAvatarUrl(friend.avatar);
       return (
         <div
           key={friend._id.toString()}
           className="flex justify-between items-center p-2 border rounded mb-1"
         >
+          {avatarUrl && (
+            <img
+              src={avatarUrl || '/default-avatar.png'}
+              alt={`${friend.name}'s avatar`}
+              className="w-10 h-10 rounded-full object-cover"
+            />)
+          }
           <span>{friend.name}</span>
 
           {!isFriend && (

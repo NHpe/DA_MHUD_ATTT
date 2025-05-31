@@ -16,10 +16,11 @@ interface User {
 interface Props {
   chatId: Types.ObjectId;
   participantList: Types.ObjectId[];
-  onClose: () => void
+  refreshChat: () => void;
+  refreshChatList: () => void
 }
 
-const ChatOption = ({chatId, participantList, onClose} : Props) => {
+const ChatOption = ({chatId, participantList, refreshChat, refreshChatList} : Props) => {
   const [members, setMembers] = useState<User[]>([]);
   const [newName, setNewName] = useState('');
   const [search, setSearch] = useState('');
@@ -46,25 +47,47 @@ const ChatOption = ({chatId, participantList, onClose} : Props) => {
   const renameChat = async () => {
     try {
       await axios.post(`http://localhost:3000/chat/change-chat-name`, { chatId, newName }, { withCredentials: true });
-      alert('Đã đổi tên');
+      refreshChatList();
+      refreshChat();
     } catch (err) {
       console.error(err);
     }
   };
 
   const addMember = async () => {
+    if (!selectedUserId) {
+      alert('Vui lòng chọn một người để thêm');
+      return;
+    }
     try {
       await axios.post(`http://localhost:3000/chat/add-participant`, { chatId, participant: selectedUserId }, { withCredentials: true });
-      alert('Đã thêm thành viên');
+
+      const res = await axios.post(
+        'http://localhost:3000/user/get-users-data',
+        { userList: selectedUserId },
+        { withCredentials: true }
+      );
+
+      const newUser = res.data?.data?.[0];
+      if (newUser) {
+        setMembers((prev) => [...prev, newUser]);
+      }
+
+      setSelectedUserId(undefined);
+      setSearch('');
+      setSearchResults([]);
+      refreshChat();
+
     } catch (err) {
       console.error(err);
     }
   };
 
-  const removeMember = async () => {
+  const removeMember = async (userId: Types.ObjectId) => {
     try {
-      await axios.post(`http://localhost:3000/chat/remove-participant`, { chatId, participant: selectedUserId }, { withCredentials: true });
-      alert('Đã xoá thành viên');
+      await axios.post(`http://localhost:3000/chat/remove-participant`, { chatId, participant: userId }, { withCredentials: true });
+      refreshChat();
+      setMembers((prev) => prev.filter((m) => m._id !== userId));
     } catch (err) {
       console.error(err);
     }
@@ -140,25 +163,18 @@ const ChatOption = ({chatId, participantList, onClose} : Props) => {
           {members.map((m) => (
             <li key={m._id.toString()} className="flex justify-between items-center">
               <span>{m.name}</span>
-              {user?._id !== m._id && (
-                <button
-                  onClick={() => {
-                    setSelectedUserId(m._id);
-                    removeMember();
-                  }}
-                  className="text-sm text-red-600 hover:underline"
-                >
-                  Xoá
-                </button>
-              )}
+                {user?._id !== m._id && (
+                  <button
+                    onClick={() => removeMember(m._id)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Xoá
+                  </button>
+                )}
             </li>
           ))}
         </ul>
       </div>
-
-      <button onClick={onClose} className="mt-4 px-3 py-1 bg-gray-300 rounded">
-        Đóng
-      </button>
     </div>
   );
 };

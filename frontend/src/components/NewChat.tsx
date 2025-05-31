@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../provider/AuthProvider';
 import { Types } from 'mongoose';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   _id: Types.ObjectId;
@@ -10,15 +11,11 @@ interface User {
   avatar?: { data: Buffer; mimetype: string };
 }
 
-interface Props {
-  onClose: () => void;
-  onCreated: () => void;
-}
-
-const NewChat = ({ onClose, onCreated }: Props) => {
+const NewChat = () => {
   const { user, refreshUser } = useAuth();
   const [chatName, setChatName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const navigate = useNavigate();
 
   const toggleSelect = (userSelected: User) => {
     setSelectedUsers(prev =>
@@ -36,17 +33,15 @@ const NewChat = ({ onClose, onCreated }: Props) => {
       }, { withCredentials: true });
 
       refreshUser();
-      onCreated();
-      onClose();
+      navigate('/');
     } catch (err) {
       console.error('Lỗi khi tạo cuộc trò chuyện:', err);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-xl space-y-4 relative">
-        <button onClick={onClose} className="absolute right-2 top-2 text-gray-500">✖</button>
+    <div className="p-4 space-y-4">
+      <h1 className="text-xl font-bold mb-2">Tạo cuộc trò chuyện mới</h1>
         <h1 className="text-2xl font-bold">Tạo cuộc trò chuyện mới</h1>
 
         <input
@@ -67,7 +62,6 @@ const NewChat = ({ onClose, onCreated }: Props) => {
           Tạo cuộc trò chuyện
         </button>
       </div>
-    </div>
   );
 };
 

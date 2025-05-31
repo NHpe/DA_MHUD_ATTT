@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { Types } from 'mongoose';
+import { useAuth } from '../provider/AuthProvider';
 
 interface Message {
   _id: Types.ObjectId;
@@ -9,6 +10,10 @@ interface Message {
   sender: {
     _id: Types.ObjectId;
     name: string;
+    avatar?: {
+      data: Buffer;
+      mimetype: string;
+    };
   };
   type: 'text' | 'file';
   content?: string;
@@ -27,6 +32,13 @@ interface Props {
   setEditingMessage: (msg: Message | null) => void;
 }
 
+const getAvatarUrl = (avatar?: { data: any; mimetype: string }) => {
+  const avatarUrl = avatar?.data
+    ? `data:${avatar.mimetype};base64,${Buffer.from(avatar.data).toString('base64')}`
+    : null;
+  return avatarUrl;
+};
+
 const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage }: Props) => {
   const [contextMenu, setContextMenu] = useState<{
     visible: boolean;
@@ -41,6 +53,7 @@ const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage
   });
 
   const contextMenuRef = useRef<HTMLUListElement>(null);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -83,13 +96,31 @@ const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage
 
   const handleRightClick = (e: React.MouseEvent, msg: Message) => {
     e.preventDefault();
+    if (msg.sender._id.toString() !== user?._id.toString()) return;
+
+    const menuWidth = 150;
+    const menuHeight = 100;
+
+    let x = e.clientX;
+    let y = e.clientY;
+
+    // Nếu menu bị tràn khỏi màn hình, điều chỉnh lại
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 10;
+    }
+
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 10;
+    }
+
     setContextMenu({
       visible: true,
-      x: e.pageX,
-      y: e.pageY,
+      x,
+      y,
       message: msg,
     });
   };
+
 
   const handleEdit = () => {
     if (!contextMenu.message) return;
@@ -152,30 +183,65 @@ const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage
 
   return (
     <div className="h-full p-4 overflow-y-auto space-y-2 relative">
-      {messages.map((msg) => (
-        <div
-          key={msg._id.toString()}
-          onContextMenu={(e) => handleRightClick(e, msg)}
-          className="p-2 bg-gray-100 rounded shadow cursor-pointer"
-        >
-          <div className="text-sm text-gray-600">{msg.sender.name}</div>
-          {msg.type === 'text' ? (
-            <div className="text-base whitespace-pre-wrap">{msg.content}</div>
-          ) : (
-            <div className="text-base text-blue-600 underline">{msg.fileName}</div>
-          )}
-          <div className="text-xs text-gray-400 text-right">
-            {new Date(msg.time).toLocaleTimeString()}
+      {messages.map((msg) => {
+        const isOwnMessage = msg.sender._id === user?._id;
+        return (
+          <div
+            key={msg._id.toString()}
+            onContextMenu={(e) => handleRightClick(e, msg)}
+            className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+          >
+            {/* Avatar cho người khác */}
+            {!isOwnMessage && (
+              <div className="mr-2">
+                {msg.sender.avatar ? (
+                  // Nếu có avatar thật
+                  <img
+                    src={getAvatarUrl(msg.sender.avatar) || undefined}
+                    alt={msg.sender.name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  // Nếu không có avatar, dùng chữ cái đầu tên
+                  <div className="w-8 h-8 rounded-full bg-blue-300 text-white flex items-center justify-center text-sm">
+                    {msg.sender.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div
+              className={`p-2 rounded shadow max-w-xs ${
+                isOwnMessage ? 'bg-green-100' : 'bg-gray-100'
+              }`}
+            >
+              {!isOwnMessage && (
+                <div className="text-sm font-semibold text-gray-700">{msg.sender.name}</div>
+              )}
+              {msg.type === 'text' ? (
+                <div className="text-base whitespace-pre-wrap">{msg.content}</div>
+              ) : (
+                <div className="text-base text-blue-600 underline">{msg.fileName}</div>
+              )}
+              <div className="text-xs text-gray-400 text-right">
+                {new Date(msg.time).toLocaleString()} {/* 👈 hiển thị ngày + giờ */}
+              </div>
+            </div>
+
+            {/* Avatar rỗng cho tin nhắn của mình để căn đều nếu cần */}
+            {isOwnMessage && (
+              <div className="ml-2 w-8 h-8" />
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {/* Context menu */}
       {contextMenu.visible && (
         <ul
           ref={contextMenuRef}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             top: contextMenu.y,
             left: contextMenu.x,
             backgroundColor: 'white',
@@ -191,12 +257,8 @@ const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage
           {contextMenu.message?.type === 'text' && (
             <li
               onClick={handleEdit}
-              style={{
-                padding: '8px 12px',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-              onMouseDown={(e) => e.preventDefault()} // prevent losing focus
+              style={{ padding: '8px 12px', cursor: 'pointer', userSelect: 'none' }}
+              onMouseDown={(e) => e.preventDefault()}
             >
               Chỉnh sửa
             </li>
@@ -204,12 +266,8 @@ const MessageList = ({ chatId, chatKey, messages, setMessages, setEditingMessage
           {contextMenu.message?.type !== 'text' && (
             <li
               onClick={handleDownload}
-              style={{
-                padding: '8px 12px',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-              onMouseDown={(e) => e.preventDefault()} // prevent losing focus
+              style={{ padding: '8px 12px', cursor: 'pointer', userSelect: 'none' }}
+              onMouseDown={(e) => e.preventDefault()}
             >
               Tải xuống
             </li>
