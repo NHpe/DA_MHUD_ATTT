@@ -3,8 +3,8 @@ import ChatService from "../Services/ChatService";
 class ChatController {
     async createChat(req, res) {
         try {
-            const {isSingle, name, participantList} = req.body;
-            const result = await ChatService.createChat(isSingle, name, participantList);
+            const {name, participantList} = req.body;
+            const result = await ChatService.createChat(name, participantList);
 
             if (result.status === 'success') {
                 return res.status(200).json({message: result.message});

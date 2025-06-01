@@ -1,6 +1,4 @@
 import { Schema, model, Types } from "mongoose";
-import User from "./UserModel";
-
 
 // Create interface
 interface IFriend {
@@ -9,7 +7,7 @@ interface IFriend {
 
     status: {
         type: string,
-        enum: ['pending', 'accepted', 'blocked']
+        enum: ['pending', 'accepted', 'requested'],
     }
 }
 

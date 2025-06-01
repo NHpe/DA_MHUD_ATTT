@@ -29,8 +29,7 @@ function route(app) {
                 avatar: user.avatar,
                 friendList: user.friendList,
                 chatList: user.chatList,
-            },
-            token,
+            }
         });
     });
 

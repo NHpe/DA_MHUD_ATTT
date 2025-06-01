@@ -6,23 +6,14 @@ import { encrypt } from "../Ultis/cryption";
 import crypto from 'node:crypto'
 
 class ChatService {
-    async createChat(isSingle: boolean, name: string, participantList: Types.ObjectId[]) {
+    async createChat(name: string, participantList: Types.ObjectId[]) {
         try {
-            let chatKey;
-            // Tạo khóa cho đoạn chat 
-            if (isSingle) {
-                const sortedUserId = [participantList[0].toString(), participantList[1].toString()].sort().join(':');
-                chatKey = crypto.scryptSync(sortedUserId, 'salt', 32); // AES-256
-            }
-            else {
-                chatKey = Buffer.from(crypto.randomFillSync(new Uint8Array(32))); // AES-256
-            }
+            const chatKey = Buffer.from(crypto.randomFillSync(new Uint8Array(32))); // AES-256
 
             const encryptChatKey = encrypt(chatKey);
 
             const chat = new Chat({
                 name,
-                type: isSingle ? 'single' : 'group',
                 participantList,
                 chatKey : encryptChatKey
             });
