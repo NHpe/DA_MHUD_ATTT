@@ -1,6 +1,6 @@
 # Secure Chat App
 
-Một ứng dụng trò chuyện bảo mật với tính năng mã hóa đầu cuối (E2EE), được xây dựng bằng React + Node.js + MongoDB.
+Một ứng dụng trò chuyện bảo mật với tính năng mã hóa tin nhắn, được xây dựng bằng React + Node.js + MongoDB.
 
 ## Tính năng nổi bật
 
